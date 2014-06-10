@@ -50,12 +50,5 @@ it's necessary to login to the Authorize.Net gateway.  The logic is handled by
 the SDK, but the UI is flexible and must be implemented by the developer.  
  
 
-Test Code - Basic
-======================================================
-
-The SDK offers many aspects of what Authorize.Net offers with their API gateway, 
-but this example will cover the process of Authorization and Capture(AuthCapture).  
-This is by far the easiest and most common use case of the SDK. 
-
 
 
