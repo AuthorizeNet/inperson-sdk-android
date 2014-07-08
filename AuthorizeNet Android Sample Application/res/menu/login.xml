@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="${com.visa.visasampleapplication}.${LoginActivity}" >
+    <item
+        android:id="@+id/dev_info"
+        android:icon="@drawable/ic_dev_info"
+        android:title="@string/dev_info_title"
+        android:showAsAction="ifRoom" />
+</menu>
