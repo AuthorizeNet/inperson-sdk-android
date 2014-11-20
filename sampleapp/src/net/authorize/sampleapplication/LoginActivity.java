@@ -65,7 +65,7 @@ public class LoginActivity extends Activity {
 
     /** Strings related to login authentication. */
     private String deviceNumber = "";
-    protected static String deviceID = "testDeviceID"; // set device ID
+    protected static String deviceID = "testDeviceID"; // set your_device_ID. You need to get a registered device id from your MINT account and set the id here
     private String deviceInfo = "";
     protected static Merchant _merchant = null;
 
@@ -275,7 +275,7 @@ public class LoginActivity extends Activity {
                 }
             } else {
                 mPasswordView
-                        .setError(getString(R.string.error_incorrect_password));
+                        .setError(getString(R.string.error_login_failure));
                 mPasswordView.requestFocus();
             }
         }

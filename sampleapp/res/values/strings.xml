@@ -44,6 +44,7 @@
     <string name="error_invalid_loginID">This login ID is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_login_failure">The login request failed. Please check network connection, username/password, device id, and other required data in the code.</string>
     <string name="error_field_required">This field is required</string>
     <string name="visa_logo">Visa Logo</string>
     <string name="title_activity_login">Sign In</string>
