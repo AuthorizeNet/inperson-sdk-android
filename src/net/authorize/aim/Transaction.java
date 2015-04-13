@@ -35,6 +35,7 @@ public class Transaction extends net.authorize.xml.XMLTransaction implements Ser
 	private static final long serialVersionUID = 2L;
 
 	private BigDecimal totalAmount = ZERO_AMOUNT;
+	private String currencyCode = "USD";
 	protected TransactionType transactionType;
 	protected Hashtable<String, String> merchantDefinedMap = new Hashtable<String, String>();
 
@@ -114,6 +115,10 @@ public class Transaction extends net.authorize.xml.XMLTransaction implements Ser
 				this.totalAmount.setScale(Transaction.CURRENCY_DECIMAL_PLACES, BigDecimal.ROUND_HALF_UP).toPlainString()));
 		transaction_req_el.appendChild(amount_el);
 
+		// currencyCode
+		Element currency_code_el = document.createElement(AuthNetField.ELEMENT_CURRENCY_CODE.getFieldName());
+		currency_code_el.appendChild(document.getDocument().createTextNode(this.currencyCode));
+		transaction_req_el.appendChild(currency_code_el);
 
 		switch (this.transactionType) {
 		case AUTH_ONLY:
@@ -845,6 +850,20 @@ public class Transaction extends net.authorize.xml.XMLTransaction implements Ser
 			userFieldsElement.appendChild(user_field_el);
 		}
 		return userFieldsElement;
+	}
+
+	/**
+	 * @return the currency code
+	 */
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+
+	/**
+	 * @param currencyCode the currency code to set
+	 */
+	public void setCurrencyCode(String currencyCode) {
+		this.currencyCode = currencyCode;
 	}
 
 	/**
