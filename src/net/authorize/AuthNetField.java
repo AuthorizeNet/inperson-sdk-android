@@ -68,6 +68,7 @@ public enum AuthNetField {
 	ELEMENT_CREDIT_CARD_EXPIRY("expirationDate"),
 	ELEMENT_CREDIT_CARD_NUMBER("cardNumber"),
 	ELEMENT_CREDIT_CARD_NUMBER_MASKED("creditCardNumberMasked"),
+	ELEMENT_CURRENCY_CODE("currencyCode"),
 	ELEMENT_CUSTOMER("customer"),
 	ELEMENT_CUSTOMER_ADDRESS_ID("customerAddressId"),
 	ELEMENT_CUSTOMER_EMAIL("customerEmail"),
