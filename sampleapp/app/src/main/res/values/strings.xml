@@ -1,0 +1,119 @@
+<resources>
+    <string name="app_name">Authorize.Net</string>
+    <string name="slogan">Accept Payments. Anywhere</string>
+
+    <!--Activity Titles-->
+    <string name="title_activity_make_transaction">MakeTransactionActivity</string>
+    <string name="title_activity_transaction_result">TransactionResultActivity</string>
+    <string name="title_activity_base">BaseActivity</string>
+    <string name="title_activity_navigation">NavigationActivity</string>
+    <string name="title_activity_anet_base">AnetBase</string>
+
+    <!--Menu Items-->
+    <string name="action_logout">Logout</string>
+    <string name="action_settings">Settings</string>
+
+    <!--Login Activity-->
+    <!--EditText Hints-->
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <!--Button Label-->
+    <string name="login">Login</string>
+
+    <!--Navigation Drawer-->
+    <string name="transaction_navigation_item">Transaction</string>
+    <string name="history_navigation_item">History</string>
+    <string name="open_drawer_action">Open</string>
+    <string name="closer_drawer_action">Close</string>
+
+    <!--TransactionFragment-->
+    <!--TextView Hints-->
+    <string name="card_number_hint">16-digit number</string>
+    <string name="cvv_hint">3-digit number</string>
+    <string name="exp_date_hint">MM/YY</string>
+    <string name="zipcode_hint">5-digit number</string>
+    <!--Error Messages-->
+    <string name="error_message">This field is required.</string>
+    <string name="card_length_error_message">Enter a 16-digit number.</string>
+    <string name="invalid_card_error_message">Invalid card number.</string>
+    <string name="valid_card_message">Valid card number.</string>
+    <string name="cvv_length_error_message">Enter a 3-digit number.</string>
+    <string name="exp_date_format_error_message">MM/YY</string>
+    <string name="zipcode_length_error_message">Enter a 6-digit number.</string>
+    <string name="invalid_expDate_message">Expired Card.</string>
+    <!--Button Labels-->
+    <string name="make_transaction">Confirm and Pay</string>
+    <string name="swipe_card_button_text">Swipe Card</string>
+    <!--EditText Hints -->
+    <string name="card_number">Card Number</string>
+    <string name="cvv_number">Security Code</string>
+    <string name="exp_date">Expiration Date</string>
+    <string name="zipcode">Zipcode</string>
+    <string name="amount">Total Amount</string>
+
+    <!--HistoryFragment-->
+    <string name="recycler_view_transactionID_text">Transaction ID: </string>
+    <string name="recycler_view_amount_text">Amount</string>
+    <string name="recycler_view_date_text">Date</string>
+    <string name="recycler_view_line">Recycler View Line</string>
+    <string name="refund_button_text">REFUND</string>
+    <string name="void_button_text">VOID</string>
+    <string name="voided_text">Voided</string>
+    <string name="refunded_text">Refunded</string>
+
+    <!--Snackbar messages and actions-->
+    <string name="snackbar_text_successful_refund">Transaction successfully refunded</string>
+    <string name="snackbar_text_successful_void">Transaction successfully voided</string>
+    <string name="snackbar_text_unsuccessful_void">Unable to void transaction</string>
+    <string name="snackbar_text_unsuccessful_refund">Unable to refund transaction</string>
+    <string name="snackbar_text_successful_transaction">Transaction was successful</string>
+    <string name="snackbar_text_no_network_connection">No network connection</string>
+    <string name="snackbar_text_failed_load_transactions">Unable to load transactions</string>
+    <string name="snackbar_action_refresh">REFRESH</string>
+    <string name="snackbar_action_retry">RETRY</string>
+
+    <!--Dialog titles and messages-->
+    <string name="dialog_title_login_error">Login Error</string>
+    <string name="dialog_message_login_error">The username or password you have entered is incorrect. Please check your entries and try again.</string>
+    <string name="dialog_title_transaction_not_refunded">Refund Unsuccessful</string>
+    <string name="dialog_title_transaction_not_voided">Void Unsuccessful</string>
+    <string name="dialog_title_transaction_unsuccessful">Transaction Unsuccessful</string>
+    <string name="dialog_title_error">Error</string>
+    <string name="dialog_title_unknown_error">Unknown Error</string>
+    <string name="dialog_message_check_unsettled_transactions">Please check your unsettled transactions.</string>
+    <string name="dialog_message_invalid_field">One or more of the fields you have entered is incorrect. Please check your entries and try again.</string>
+    <string name="dialog_message_invalid_amount">The amount field is empty. Please enter a valid amount for the transaction.</string>
+    <string name="dialog_message_unknown_error">An unknown error has occurred. </string>
+    <string name="progress_dialog_title_please_wait">Please wait . . . </string>
+    <string name="progress_dialog_message_processing_transaction">Processing Transaction . . .</string>
+    <string name="progress_dialog_message_processing_swipe">Processing Swipe . . .</string>
+    <string name="dialog_title_session_expired">Session Expired</string>
+    <string name="dialog_message_session_expired">Your session has expired. Please login again.</string>
+    <string name="dialog_session_expired_yes_choice">Login</string>
+    <string name="dialog_session_expired_no_choice">Close</string>
+
+    <!--TransactionReceiptActivity-->
+    <string name="receipt_transaction_id_text">Transaction ID </string>
+    <string name="receipt_transaction_total">TOTAL </string>
+    <string name="order_summary_title">ORDER SUMMARY</string>
+    <string name="receipt_date_text">Date</string>
+    <string name="payment_history_button">Payment History</string>
+    <string name="new_transaction_button">New Transaction</string>
+    <string name="receipt_card_number_text">Card Number</string>
+    <string name="receipt_card_type_text">Card Type</string>
+    <string name="manual_payment_header">Payment Information</string>
+    <string name="manual_payment_subtitle">Enter Information Manually</string>
+    <string name="no_transactions">No Transactions to Display</string>
+
+    <!--ImageView Content Descriptions-->
+    <string name="loginID_icon">Login Icon</string>
+    <string name="password_icon">Password Icon</string>
+    <string name="mobile_icon">Mobile Device Icon</string>
+    <string name="desktop_icon">Desktop Icon</string>
+    <string name="store_icon">Store Icon</string>
+    <string name="credit_card_icon">Credit Card Icon</string>
+    <string name="calendar_icon">Calendar Icon</string>
+    <string name="location_icon">Location Icon</string>
+    <string name="amount_icon">Total Amount Icon</string>
+    <string name="navigation_drawer_header">Navigation Drawer Header Image</string>
+</resources>

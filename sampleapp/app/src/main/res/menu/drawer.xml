@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/drawer_transaction"
+            android:icon="@drawable/ic_payment_black_24dp"
+            android:title="@string/transaction_navigation_item"/>
+
+        <item
+            android:id="@+id/drawer_history"
+            android:icon="@drawable/ic_history_black_24dp"
+            android:title="@string/history_navigation_item"/>
+
+    </group>
+</menu>

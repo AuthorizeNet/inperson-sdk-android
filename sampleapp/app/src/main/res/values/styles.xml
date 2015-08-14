@@ -1,0 +1,105 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/ThemeColor</item>
+        <item name="colorPrimaryDark">@color/ThemeColorDark</item>
+        <item name="colorAccent">@color/Accent</item>
+        <item name="colorControlNormal">@color/HintColor</item>
+        <item name="colorControlActivated">@color/Accent</item>
+        <item name="colorControlHighlight">@color/Accent</item>
+    </style>
+
+
+    <style name="Login_Field_Content"  parent="@android:style/TextAppearance.Medium">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="Card_Field_Content"  parent="@android:style/TextAppearance.Medium">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:inputType">number</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+
+    <style name="Login_Error_Message" parent="@android:style/TextAppearance.Medium">
+        <item name="android:text">@string/error_message</item>
+        <item name="android:textColor">@color/ErrorMessageColor</item>
+        <item name="android:gravity">end</item>
+        <item name="android:visibility">gone</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="Error_Message" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textColor">@color/HintColor</item>
+        <item name="android:gravity">end</item>
+        <item name="android:visibility">visible</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="Login_Icon"  parent="@android:style/TextAppearance.Medium">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:padding">@dimen/icon_padding</item>
+        <item name="android:tint">@color/ThemeColor</item>
+    </style>
+
+    <style name="Icon"  parent="@android:style/TextAppearance.Medium">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">.3</item>
+        <item name="android:tint">@color/ThemeColor</item>
+        <item name="android:padding">@dimen/icon_padding</item>
+    </style>
+
+
+    <style name="Button_Style" parent="@android:style/TextAppearance.Medium">
+        <item name="android:layout_margin">10dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/field_content_size</item>
+        <item name="android:elevation">@dimen/elevation</item>
+        <item name="android:layout_marginTop">@dimen/activity_horizontal_margin</item>
+        <item name="android:textColor">@color/White</item>
+    </style>
+
+    <style name="Slogan_Icon" parent="@android:style/TextAppearance.Medium">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:padding">@dimen/icon_padding</item>
+    </style>
+
+    <style name="Receipt_Field_Layout" parent="@android:style/TextAppearance.Medium">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">20dp</item>
+        <item name="android:layout_marginLeft">20dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="Line" parent="@android:style/TextAppearance.Medium">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">2dp</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:layout_marginEnd">10dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:background">@color/HistoryLineColor</item>
+    </style>
+
+
+</resources>
