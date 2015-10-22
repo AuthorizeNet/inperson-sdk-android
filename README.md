@@ -30,7 +30,7 @@ directory.  Make sure the files get unzipped directly into the root SDK
 directory.
 
 2.  If your AndroidManifest.xml file doesn't already allow access to the
-Internet and your phone state, make sure to add the following snippetd in the 
+Internet and your phone state, make sure to add the following snippet in the 
 manifest element.
 
   <uses-permission android:name="android.permission.INTERNET"/>
