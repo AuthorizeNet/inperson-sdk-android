@@ -1,8 +1,6 @@
 # Authorize.Net In-Person Android SDK Integration Guide 
 
-The Authorize.Net Android In-Person SDK enables you to build point-of-sale Android applications that accept EMV payments. The merchantís application invokes this SDK to complete an EMV transaction. For all transactions except EMV transactions, the SDK will be used like a standard Authorize.Net Java SDK. The source code can be found here:
-
-https://github.com/AuthorizeNet/sdk-java 
+The Authorize.Net Android In-Person SDK enables you to build point-of-sale Android applications that accept EMV payments. The merchantís application invokes this SDK to complete an EMV transaction. 
 
 The SDK handles the complex EMV workflow and securely submits the EMV transaction to the Authorize.Net gateway for processing. The merchantís application never touches any EMV data at any time, simplifying PCI compliance.  
 
