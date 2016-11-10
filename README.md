@@ -130,4 +130,3 @@ Field Order | Response Code | Response Reason Code | Text
 3 | 2 | 361	| The EMV version is invalid.
 3 | 2 | 362	| x_emv_version is required.
 
-
