@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SampleApplication.iml" filepath="$PROJECT_DIR$/SampleApplication.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/emv-anet-sdk/emv-anet-sdk.iml" filepath="$PROJECT_DIR$/emv-anet-sdk/emv-anet-sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sampleapp.iml" filepath="$PROJECT_DIR$/sampleapp.iml" />
     </modules>
   </component>
 </project>
