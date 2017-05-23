@@ -1,36 +1,148 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
+    android:orientation="vertical"
     android:padding="30dp">
-
-    <TextView android:text="Set Transaction Amount" android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/transaction_amount_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView android:text="Set Transaction Amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView"
+            android:textSize="24sp" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:id="@+id/editTextAmount"
+            android:gravity="end"
+            android:hint="0.00" />
+    </LinearLayout>
+    <TextView
+        android:text="Status"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/textView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
+        android:layout_below="@+id/transaction_amount_container"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:textSize="20sp"
+        android:id="@+id/statustextView" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="swipe only?"/>
+                <ToggleButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/swipe_only_mode_toggle_button"/>
 
-        android:gravity="fill_vertical|center_horizontal" />
+                <TextView
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bluetooth?"/>
+                <ToggleButton
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/bluetooth_toggle_button"/>
+            </LinearLayout>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Process payment with EMV"
+                android:id="@+id/emvbutton" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Process payment with QuickChip"
+                android:id="@+id/quickchipbutton" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Prepare Data with QuickChip"
+                android:id="@+id/preparequichichipdatabutton"/>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Process payment"
-        android:id="@+id/button"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="61dp" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Clear Saved Data"
+                android:id="@+id/clearsaveddatabutton"/>
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
-        android:ems="10"
-        android:id="@+id/editTextAmount"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/button"
-        android:layout_toEndOf="@+id/button"
-        android:hint="0.00" />
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Process Payment With QuickChip and Tip Options"
+                android:id="@+id/process_payment_with_quickchip_and_tip_options" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="QuickChip and Tip Amount"
+                    android:id="@+id/process_payment_with_quickchip_and_tip_amount" />
+                <EditText
+                    android:id="@+id/tip_amount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="4"
+                    android:inputType="numberDecimal"
+                    android:hint="0.00"
+                    android:gravity="end"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <EditText
+                    android:id="@+id/table_number_edit_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:hint="Table Number"/>
+                <EditText
+                    android:id="@+id/employee_id_edit_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:hint="Employee ID"/>
+
+            </LinearLayout>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Quick Chip Auth Only"
+                android:id="@+id/quickchipauthonly" />
+
+            <Button
+                android:id="@+id/last_transaction_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Last Transaction"
+                />
 
 
-</RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

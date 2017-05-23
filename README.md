@@ -15,11 +15,12 @@ The merchant's app invokes this SDK to complete an EMV transaction. The SDK hand
 
 # SDK Overview
 
-1. Using the SDK to Create and Submit an EMV Transaction
-2. Configuring the UI
-3. Non-EMV Transaction Processing
-4. Receipts	
-5. Reporting
+1. Using the SDK to Create and Submit an EMV Transaction.
+2. Configuring the UI.
+3. Non-EMV Transaction Processing.
+4. Receipts.
+5. Reporting.
+6. OTA Update.
 
 ## Using the SDK to Create and Submit an EMV Transaction
 
@@ -40,13 +41,13 @@ The merchant application must populate all the fields required by a standard pay
 
 ```java
 EMVTransactionType {
-    GOODS(0),
-    SERVICES(1),
-    CASHBACK(2),
-    INQUIRY(3),
-    TRANSFER(4),
-    PAYMENT(5),
-    REFUND(6);
+GOODS(0),
+SERVICES(1),
+CASHBACK(2),
+INQUIRY(3),
+TRANSFER(4),
+PAYMENT(5),
+REFUND(6);
 }
 
 emvTransaction.setEmvTransactionType(EMVTransactionType.GOODS);
@@ -64,11 +65,11 @@ EMVTransactionManager.startEMVTransaction(EMVTransaction emvTransaction, final E
 `EMVTransactionListener` is the callback interface of the `EMVTransaction` object. It must be implemented by the merchant application.
 
 ```java
-    public interface EMVTransactionListener {
-      void onEMVTransactionSuccessful(Result result);
-      void onEMVReadError(EMVErrorCode emvError);
-      void onEMVTransactionError(Result result, EMVErrorCode emvError);
-    }
+public interface EMVTransactionListener {
+void onEMVTransactionSuccessful(Result result);
+void onEMVReadError(EMVErrorCode emvError);
+void onEMVTransactionError(Result result, EMVErrorCode emvError);
+}
 ```
 
 ### Responses
@@ -93,18 +94,217 @@ An error occurred in collecting the EMV encrypted BLOB (Binary Large Object) fro
 ```java
 // EMV ERROR Codes
 EMVErrorCode {
-    UNKNOWN(0),
-    TRANSACTION_CANCELED(1),
-    READER_INITIALIZATION_ERROR(2),
-    TIMEOUT(3),
-    INPUT_INVALID(4),
-    VOLUME_WARNING_NOT_ACCEPTED(5),
-    CRITICAL_LOW_BATTERY(6),
-    TRANSACTION_TERMINATED(7),
-    TRANSACTION_DECLINED(8),
-    UNKNOWN_READER_ERROR(9);
+UNKNOWN(0),
+TRANSACTION_CANCELED(1),
+READER_INITIALIZATION_ERROR(2),
+TIMEOUT(3),
+INPUT_INVALID(4),
+VOLUME_WARNING_NOT_ACCEPTED(5),
+CRITICAL_LOW_BATTERY(6),
+TRANSACTION_TERMINATED(7),
+TRANSACTION_DECLINED(8),
+UNKNOWN_READER_ERROR(9);
 }
 ```
+
+## QuickChip
+
+The In-Person SDK for Android supports Visa's Quick Chip. Here are the entry points in `EMVTransactionManager`:
+
+```java
+//entry points
+public static void startQuickChipTransaction(EMVTransaction emvTransaction, final QuickChipTransactionSessionListener quickChipTransactionSessionListener, Context context, boolean  showSignature, boolean isAuthOnlyTransaction)
+public static void prepareDataForQuickChipTransaction(final Context context, final QuickChipTransactionSessionListener quickChipTransactionSessionListener)
+public static boolean hasStoredQuickChipData()
+public static void clearStoredQuickChipData(final QuickChipTransactionSessionListener quickChipTransactionSessionListener)
+//interfaces
+public interface QuickChipTransactionSessionListener extends EMVTransactionListener{
+void onTransactionStatusUpdate(String transactionStatus);
+void onPrepareQuickChipDataSuccessful();
+void onPrepareQuickChipDataError(EMVErrorCode error, String cause);
+}
+```
+We support Quick Chip with UI and Quick Chip in the background.
+
+### Quick chip with SDK provided UI
+
+The `startQuickChipTransaction` call works in the same way as `startEMVTransaction`:
+1. Provide the `EMVTransaction`, `QuickChipTransactionSessionListener` objects with transaction details and callbacks.
+2. Set `Context` object to be the calling Android context (mostly `Activity`).
+3. `isAuthOnlyTransaction` boolean provides users with a way of doing transaction without capturing it. This can be useful if user wants to authorize for some amount and later on capture with a different one. If you do not plan to use this functionality, simply set it to `false`.
+
+Here is a code example using these steps:
+
+```java
+// Implement your app logic in the following callbacks:
+
+EMVTransactionManager.QuickChipTransactionSessionListener iemvTransaction = new EMVTransactionManager.QuickChipTransactionSessionListener() {
+@Override
+public void onEMVTransactionSuccessful(net.authorize.aim.emv.Result result) {
+
+}
+
+@Override
+public void onEMVReadError(EMVErrorCode emvError) {
+
+}
+
+@Override
+public void onEMVTransactionError(net.authorize.aim.emv.Result result, EMVErrorCode emvError) {
+
+}
+
+@Override
+public void onTransactionStatusUpdate(String transactionStatus) {
+
+}
+
+@Override
+public void onPrepareQuickChipDataSuccessful() {
+
+}
+
+@Override
+public void onPrepareQuickChipDataError(EMVErrorCode error, String cause) {
+
+}
+};
+
+// Construct the transaction object.
+
+Order order = Order.createOrder();
+OrderItem oi = OrderItem.createOrderItem();
+oi.setItemId("1");
+oi.setItemName("name");
+
+oi.setItemQuantity("1");
+oi.setItemTaxable(false);
+oi.setItemDescription("desc");
+oi.setItemDescription("Goods");
+
+order.addOrderItem(oi);
+BigDecimal transAmount = new BigDecimal("1.00");
+oi.setItemPrice(transAmount);
+order.setTotalAmount(transAmount);
+
+// Assume AppManager.merchant is where we keep the singleton merchant object after successful authentication.
+
+EMVTransaction emvTransaction = EMVTransactionManager.createEMVTransaction(AppManager.merchant, transAmount);
+emvTransaction.setEmvTransactionType(EMVTransactionType.GOODS);
+emvTransaction.setOrder(order);
+emvTransaction.setSolutionID("SOLUTION ID");
+
+// Optional fields for tip.
+
+emvTransaction.setTableNumber("TABLE 1");
+emvTransaction.setEmployeeId("EMPLOYEE 1");
+
+// Start Quick Chip transaction with your context.
+
+EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context);
+```
+
+### Quick Chip in the Background
+
+To use Quick Chip without the UI component, being the transaction by calling `prepareDataForQuickChipTransaction`. Here are the steps:
+
+1. Provide a `QuickChipTransactionSessionListener` object that listens to SDK status changes as it communicates with reader. Information and error messages will be shown through `QuickChipTransactionSessionListener` callbacks.
+2. After a `onPrepareQuickChipDataSuccessful` callback, card data will be temporarily stored inside the SDK. To finish the transaction, just initiate `startQuickChipTransaction` with the transaction details and finish the transaction.
+3. You can check if there is any stored card data using `hasStoredQuickChipData`, or choose to discard that data using `clearStoredQuickChipData`.
+
+Here is the code snippet for the above section:
+```java
+// Create the transaction objects in the same way as start Quick Chip
+// EMVTransaction emvTransaction;
+// Context context;
+
+// Prepare data for quick chip transaction.
+
+EMVTransactionManager.prepareDataForQuickChipTransaction(context, iemvTransaction);
+
+// Callback Methods.
+
+EMVTransactionManager.QuickChipTransactionSessionListener iemvTransaction = new EMVTransactionManager.QuickChipTransactionSessionListener() {
+@Override
+public void onEMVTransactionSuccessful(net.authorize.aim.emv.Result result) {
+
+}
+
+@Override
+public void onEMVReadError(EMVErrorCode emvError) {
+
+}
+
+@Override
+public void onEMVTransactionError(net.authorize.aim.emv.Result result, EMVErrorCode emvError) {
+
+}
+
+@Override
+public void onTransactionStatusUpdate(String transactionStatus) {
+
+}
+
+@Override
+public void onPrepareQuickChipDataSuccessful() {
+//should return true
+EMVTransactionManager.hasStoredQuickChipData();
+
+}
+
+@Override
+public void onPrepareQuickChipDataError(EMVErrorCode error, String cause) {
+//clear data if error happens
+EMVTransactionManager.clearStoredQuickChipData();
+}
+};
+
+// Finish transaction by calling startQuickChipTransaction after prepareDataForQuickChipTransaction is completed.
+
+EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context);
+```
+
+**NOTE:** To use Quick Chip functionality, the card reader has to be on updated firmware version and config. Refer to the OTA Update section for more details.
+
+## Tips
+
+The In-Person Android SDK supports tips functionality. Available entry points are:
+
+```java
+// Entry points
+
+public static void startQuickChipTransaction(EMVTransaction emvTransaction, final QuickChipTransactionSessionListener quickChipTransactionSessionListener, Context context, double tipAmount)
+public static void startQuickChipTransaction(EMVTransaction emvTransaction, final QuickChipTransactionSessionListener quickChipTransactionSessionListener, Context context, TipOptions tipOptions)
+
+// Tip options 
+
+public static class TipOptions {
+Integer tipOption1;
+Integer tipOption2;
+Integer tipOption3;
+}
+```
+As shown in the above code, we accept two types of tip: one with exact tip amount and the other one with tip percentage that is going to be added on top of the transaction total amount. To use tip amount field, simply specify tip amount in the `tipAmount` field in the first call; to use tip options, create a `TipOptions` object with specified options and they will appear in the checkout screen for Quick Chip transactions.
+
+Here is the code snippet for adding tip to an `EMVTransaction`
+
+```java
+// Start Quick Chip with tip options.
+
+EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context, new EMVTransactionManager.TipOptions(15, 18, 20));
+
+// start Quick Chip with tip value.
+
+EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context, 1.00);
+
+// Start Quick Chip with an authorization-only transaction. Merchants can settle with different amount later.
+
+EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context, true, true);
+```
+
+![Screenshot](/Screenshots/TipOptions.png)
+
+**NOTE:** Tips functionality is currently only valid for TSYS merchants.
 
 ## Configuring the UI
 
@@ -142,17 +342,17 @@ The SDK supports the following transaction types that can be posted to Authorize
 
 ```java
 /**
- * The credit card transaction types supported by the payment gateway.
- */
+* The credit card transaction types supported by the payment gateway.
+*/
 public enum TransactionType {
-	AUTH_CAPTURE,
-	AUTH_ONLY,
-	PRIOR_AUTH_CAPTURE,
-	CAPTURE_ONLY,
-	TransactionType.,
-	UNLINKED_CREDIT,
-	VOID,
-	CASH;
+AUTH_CAPTURE,
+AUTH_ONLY,
+PRIOR_AUTH_CAPTURE,
+CAPTURE_ONLY,
+TransactionType.,
+UNLINKED_CREDIT,
+VOID,
+CASH;
 }
 ```
 
@@ -171,7 +371,7 @@ net.authorize.aim.Result result = (net.authorize.aim.Result)testMerchant.postTra
 //if login succeeded, populate session token in the Merchant object
 SessionTokenAuthentication sessionTokenAuthentication = SessionTokenAuthentication.createMerchantAuthentication(testMerchant.getMerchantAuthentication().getName(), loginResult.getSessionToken(), "Test EMV Android");
 if ((loginResult.getSessionToken() != null) && (sessionTokenAuthentication != null)) {
-    testMerchant.setMerchantAuthentication(sessionTokenAuthentication);
+testMerchant.setMerchantAuthentication(sessionTokenAuthentication);
 }
 
 //create new credit card object with required fields
@@ -210,7 +410,7 @@ net.authorize.aim.Result result = (net.authorize.aim.Result)testMerchant.postTra
 //if login succeeded, populate session token in the Merchant object
 SessionTokenAuthentication sessionTokenAuthentication = SessionTokenAuthentication.createMerchantAuthentication(testMerchant.getMerchantAuthentication().getName(), loginResult.getSessionToken(), "Test EMV Android");
 if ((loginResult.getSessionToken() != null) && (sessionTokenAuthentication != null)) {
-    testMerchant.setMerchantAuthentication(sessionTokenAuthentication);
+testMerchant.setMerchantAuthentication(sessionTokenAuthentication);
 }
 
 //create new credit card object and populate it with the encrypted card data coming from the reader
@@ -251,34 +451,34 @@ To send the customer a transaction receipt, create a notification transaction an
 ```java
 //assume we have MerchantContact Object that stores merchant contact info
 MerchantContact contact = getMerchantContact();
-if(contact!=null){
-    StringBuilder sb = new StringBuilder();
-    if(StringUtils.isNotEmpty(contact.getCompanyName())){
-                                                                sb.append(contact.getCompanyName());
-    }
-    sb.append("<br/>");
-    if(StringUtils.isNotEmpty(contact.getAddress())){
-                                                sb.append(contact.getAddress());
-                                }
-                                sb.append("<br/>");
-                                if(StringUtils.isNotEmpty(contact.getCity())){
-                                                sb.append(contact.getCity());
-                                                sb.append(", ");
-                                }
-    if(StringUtils.isNotEmpty(contact.getState())){
-                                                sb.append(contact.getState());
-                                                sb.append(" ");
-                                }
-    if(StringUtils.isNotEmpty(contact.getZip())){
-                                                sb.append(contact.getZip());
+if (contact != null) {
+StringBuilder sb = new StringBuilder();
+if (StringUtils.isNotEmpty(contact.getCompanyName())) {
+sb.append(contact.getCompanyName());
+}
+sb.append("<br/>");
+if (StringUtils.isNotEmpty(contact.getAddress())) {
+sb.append(contact.getAddress());
+}
+sb.append("<br/>");
+if (StringUtils.isNotEmpty(contact.getCity())) {
+sb.append(contact.getCity());
+sb.append(", ");
+}
+if (StringUtils.isNotEmpty(contact.getState())) {
+sb.append(contact.getState());
+sb.append(" ");
+}
+if (StringUtils.isNotEmpty(contact.getZip())) {
+sb.append(contact.getZip());
 
-                                }
-    sb.append("<br/>");
-                                if(StringUtils.isNotEmpty(contact.getPhone())){
-                                                sb.append(contact.getPhone());
-                                }
+}
+sb.append("<br/>");
+if (StringUtils.isNotEmpty(contact.getPhone())) {
+sb.append(contact.getPhone());
+}
 
-                                                                er.setHeaderEmailReceipt(sb.toString());
+er.setHeaderEmailReceipt(sb.toString());
 }
 net.authorize.notification.Transaction t = testMerchant.createNotificationTransaction(net.authorize.notification.TransactionType.CUSTOMER_TRANSACTION_RECEIPT_EMAIL, er);
 t.setTransId(transactionId);
@@ -318,6 +518,22 @@ result = (net.authorize.reporting.Result) AnetHelper.merchant.postTransaction(t)
 To use other report types, simply change `TransactionType` to other enum values.
 
 *NOTE:* For other supported transaction types, refer to the Transaction and Result object in the `net.authorize.notification` package.
+
+## OTA Updates
+
+The In-Person Android SDK has the ability to do an Over-The-Air update for [AnywhereCommerce Walker C2X magstripe and chip reader]( https://partner.posportal.com/authorizenet/auth/anywherecommerce-walker-c2x-for-authorizenet.html). To use this functionality, initiate the following SDK call:
+
+```java
+public static void startOTAUpdate(Context context, boolean demoMode)
+```
+
+where `context` is the calling Android Context and `demoMode` is for setting the update to be going to either a demo server or a production server.
+
+![Screenshot](/Screenshots/OTAUpdate.png)
+
+In the OTA update page, you have the option to do firmware update, config update, or both. In the option menu, you may get detailed info for the reader that you are currently using.
+
+**NOTE:** OTA update may take up to 30 min to finish, please make sure reader is fully charged and do not unplug reader while updating.
 
 
 ## Error Codes
