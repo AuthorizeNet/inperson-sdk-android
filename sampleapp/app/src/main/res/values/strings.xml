@@ -3,6 +3,10 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="logout">Logout</string>
+    <string name="otaupdate">OTAUpdate</string>
+    <string name="otaupdate_background">OTAUpdate Background</string>
+    <string name="otaupdate_demo">OTAUpdate_DEMO</string>
     <string-array name="country_arrays">
         <item>$1</item>
         <item>$2</item>

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-android:padding="20dp"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:padding="20dp"
     android:layout_height="match_parent">
 
     <TextView
         android:padding="20dp"
-        android:layout_width="300dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="- Receipt -"
@@ -16,15 +17,15 @@ android:padding="20dp"
        />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Successful"
         android:id="@+id/textViewStatus"
-android:textStyle="bold"
+        android:textStyle="bold"
         android:paddingTop="35dp" />
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Transacton Id: "
@@ -33,7 +34,7 @@ android:textStyle="bold"
         android:paddingTop="10dp" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Amount : 2 USD$"
@@ -42,7 +43,7 @@ android:textStyle="bold"
         android:paddingTop="10dp" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="AppId: A00123345"
