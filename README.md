@@ -13,6 +13,13 @@ The merchant's app invokes this SDK to complete an EMV transaction. The SDK hand
 5.	Do not remove card until the transaction is complete.
 6.	If at any time the user cancels the transaction, the EMV transaction is cancelled.
 
+# Setting Up Your Project
+
+1. Confirm that you are using Android Studio 2.3+ with min Android SDK version 21 and Gradle 2.14.1.
+2. Select File > Open > sampleapp to open the project.
+3. Run Sync in Gradle to bring all the dependencies up to date.
+4. Plug in the test reader and run the sample application.
+
 # SDK Overview
 
 1. Using the SDK to Create and Submit an EMV Transaction
