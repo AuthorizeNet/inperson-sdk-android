@@ -35,11 +35,13 @@ import com.bbpos.bbdevice.BBDeviceController;
 
 import net.authorize.ResponseReasonCode;
 import net.authorize.aim.emv.EMVActivity;
+import net.authorize.aim.emv.EMVDeviceConnectionType;
 import net.authorize.aim.emv.EMVErrorCode;
 import net.authorize.aim.emv.EMVTransaction;
 import net.authorize.aim.emv.EMVTransactionManager;
 import net.authorize.aim.emv.EMVTransactionType;
 import net.authorize.aim.emv.EmvSdkUISettings;
+import net.authorize.aim.emv.OTAUpdateManager;
 import net.authorize.aim.emv.QuickChipTransactionSession;
 import net.authorize.data.Order;
 import net.authorize.data.OrderItem;
@@ -565,8 +567,8 @@ public class MainActivity extends ActionBarActivity {
                                                                     : EMVTransactionManager.TerminalMode.SWIPE_OR_INSERT;
             EMVTransactionManager.setTerminalMode(terminalMode);
 
-            EMVTransactionManager.DeviceConnectionType deviceConnectionType = bluetoothToggleButton.isChecked()?
-                    EMVTransactionManager.DeviceConnectionType.BLUETOOTH : EMVTransactionManager.DeviceConnectionType.AUDIO;
+            EMVDeviceConnectionType deviceConnectionType = bluetoothToggleButton.isChecked()?
+                    EMVDeviceConnectionType.BLUETOOTH : EMVDeviceConnectionType.AUDIO;
             EMVTransactionManager.setDeviceConnectionType(deviceConnectionType);
 
             if (view == emvButton) {
@@ -617,9 +619,9 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (bluetoothToggleButton.isChecked()) {
-            EMVTransactionManager.setDeviceConnectionType(EMVTransactionManager.DeviceConnectionType.BLUETOOTH);
+            EMVTransactionManager.setDeviceConnectionType(EMVDeviceConnectionType.BLUETOOTH);
         } else {
-            EMVTransactionManager.setDeviceConnectionType(EMVTransactionManager.DeviceConnectionType.AUDIO);
+            EMVTransactionManager.setDeviceConnectionType(EMVDeviceConnectionType.AUDIO);
         }
         // Handle item selection
         switch (item.getItemId()) {
@@ -641,10 +643,10 @@ public class MainActivity extends ActionBarActivity {
                 t.start();
                 return true;
             case R.id.ota_update:
-                EMVTransactionManager.startOTAUpdate(this, false);
+                OTAUpdateManager.startOTAUpdate(this, false);
                 return true;
             case R.id.ota_update_demo:
-                EMVTransactionManager.startOTAUpdate(this, true);
+                OTAUpdateManager.startOTAUpdate(this, true);
         }
 
         return false;
