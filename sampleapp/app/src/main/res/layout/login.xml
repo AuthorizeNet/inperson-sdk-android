@@ -44,7 +44,34 @@
 
 
                 />
+            <RadioGroup
+                android:id="@+id/login_type_radio_group"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                >
+                <RadioButton
+                    android:checked="true"
+                    android:id="@+id/test_radio_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:text="TEST"/>
+                <RadioButton
+                    android:id="@+id/prod_radio_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:text="PROD"/>
+                <RadioButton
+                    android:visibility="gone"
+                    android:id="@+id/hotspot_radio_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:text="HOTSPOT"/>
 
+            </RadioGroup>
 
         </LinearLayout>
 
