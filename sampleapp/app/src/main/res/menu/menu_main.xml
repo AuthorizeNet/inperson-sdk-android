@@ -4,5 +4,7 @@
     <item android:id="@+id/logout" android:title="@string/logout" />
     <item android:id="@+id/ota_update" android:title="@string/otaupdate"/>
     <item android:id="@+id/ota_update_demo" android:title="@string/otaupdate_demo"/>
+    <item android:id="@+id/reset_reader" android:title="@string/reset_reader"/>
+    <item android:id="@+id/device_info" android:title="@string/get_device_info"/>
     <!--item android:id="@+id/ota_update_headless" android:title="@string/otaupdate_background"/-->
 </menu>

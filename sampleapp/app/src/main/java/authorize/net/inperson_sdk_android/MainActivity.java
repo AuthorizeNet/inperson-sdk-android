@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -41,6 +42,7 @@ import net.authorize.aim.emv.EMVTransaction;
 import net.authorize.aim.emv.EMVTransactionManager;
 import net.authorize.aim.emv.EMVTransactionType;
 import net.authorize.aim.emv.EmvSdkUISettings;
+import net.authorize.aim.emv.OTAUpdateHeadless;
 import net.authorize.aim.emv.OTAUpdateManager;
 import net.authorize.aim.emv.QuickChipTransactionSession;
 import net.authorize.data.Order;
@@ -57,6 +59,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
@@ -149,7 +152,6 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -206,40 +208,6 @@ public class MainActivity extends ActionBarActivity {
             //rf.initializeDevice(); // already have permissions so initialize
         }
     }
-
-
-    EMVTransactionManager.QuickChipTransactionSessionListener iemvTransaction1 = new EMVTransactionManager.QuickChipTransactionSessionListener() {
-        @Override
-        public void onEMVTransactionSuccessful(net.authorize.aim.emv.Result result) {
-
-        }
-
-        @Override
-        public void onEMVReadError(EMVErrorCode emvError) {
-
-        }
-
-        @Override
-        public void onEMVTransactionError(net.authorize.aim.emv.Result result, EMVErrorCode emvError) {
-
-        }
-
-        @Override
-        public void onTransactionStatusUpdate(String transactionStatus) {
-
-        }
-
-        @Override
-        public void onPrepareQuickChipDataSuccessful() {
-
-        }
-
-        @Override
-        public void onPrepareQuickChipDataError(EMVErrorCode error, String cause) {
-
-        }
-    };
-
 
 
     EMVTransactionManager.QuickChipTransactionSessionListener iemvTransaction = new EMVTransactionManager.QuickChipTransactionSessionListener() {
@@ -525,6 +493,59 @@ public class MainActivity extends ActionBarActivity {
 
     };
 
+    OTAUpdateManager.HeadlessOTAUpdateListener headlessOTAUpdateListener = new OTAUpdateManager.HeadlessOTAUpdateListener() {
+        @Override
+        public void onReturnOTAUpdateHeadlessProgress(OTAUpdateManager.HeadlessOTAUpdateStatus headlessOTAUpdateStatus, double v) {
+
+        }
+
+        @Override
+        public void onReturnCheckForUpdateResult(OTAUpdateManager.HeadlessOTACheckResult headlessOTACheckResult) {
+
+        }
+
+        @Override
+        public void onReturnOTAUpdateHeadlessResult(OTAUpdateManager.HeadlessOTAUpdateType headlessOTAUpdateType, OTAUpdateManager.HeadlessOTAUpdateResult headlessOTAUpdateResult, String s) {
+
+        }
+
+        @Override
+        public void onReturnDeviceInfo(Hashtable<String, String> deviceInfo) {
+            StringBuilder sb = new StringBuilder();
+            for (String key : deviceInfo.keySet()) {
+                sb.append(key).append(" : ").append(deviceInfo.get(key)).append("\n");
+            }
+            AlertDialog.Builder adb = new AlertDialog.Builder(context);
+            adb.setTitle("Device Info");
+            adb.setMessage(sb.toString());
+            adb.setNeutralButton("OK", null);
+            adb.setCancelable(true);
+
+            adb.show();
+        }
+
+        @Override
+        public void onReturnOTAUpdateError(OTAUpdateManager.HeadlessOTAUpdateError headlessOTAUpdateError, String s) {
+
+        }
+
+        @Override
+        public void onBluetoothScanTimeout() {
+
+        }
+
+        @Override
+        public void onReturnBluetoothDevices(List<BluetoothDevice> list) {
+
+        }
+
+        @Override
+        public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {
+
+        }
+    };
+
+
     View.OnClickListener mListner = new View.OnClickListener() {
 
         public void onClick(View view) {
@@ -557,7 +578,6 @@ public class MainActivity extends ActionBarActivity {
             EMVTransaction emvTransaction = EMVTransactionManager.createEMVTransaction(AppManager.merchant, transAmount);
             emvTransaction.setEmvTransactionType(EMVTransactionType.GOODS);
             emvTransaction.setOrder(order);
-            emvTransaction.setSolutionID("SOLUTION ID");
 
             //optional fields for tip
             emvTransaction.setTableNumber(tableNumberEditText.getText().toString());
@@ -647,6 +667,13 @@ public class MainActivity extends ActionBarActivity {
                 return true;
             case R.id.ota_update_demo:
                 OTAUpdateManager.startOTAUpdate(this, true);
+                return true;
+            case R.id.reset_reader:
+                EMVTransactionManager.resetReader(this, iemvTransaction);
+                return true;
+            case R.id.device_info:
+                OTAUpdateManager.getDeviceInfo(this,true, headlessOTAUpdateListener);
+                return true;
         }
 
         return false;
