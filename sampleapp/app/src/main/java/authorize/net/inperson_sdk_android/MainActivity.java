@@ -7,42 +7,35 @@ import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.media.AudioManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.bbpos.bbdevice.BBDeviceController;
-
 import net.authorize.ResponseReasonCode;
-import net.authorize.aim.emv.EMVActivity;
 import net.authorize.aim.emv.EMVDeviceConnectionType;
 import net.authorize.aim.emv.EMVErrorCode;
 import net.authorize.aim.emv.EMVTransaction;
 import net.authorize.aim.emv.EMVTransactionManager;
 import net.authorize.aim.emv.EMVTransactionType;
 import net.authorize.aim.emv.EmvSdkUISettings;
-import net.authorize.aim.emv.OTAUpdateHeadless;
 import net.authorize.aim.emv.OTAUpdateManager;
 import net.authorize.aim.emv.QuickChipTransactionSession;
 import net.authorize.data.Order;
@@ -52,11 +45,8 @@ import net.authorize.mobile.TransactionType;
 import net.authorize.util.StringUtils;
 import net.authorize.xml.MessageType;
 
-import org.w3c.dom.Text;
-
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -81,6 +71,9 @@ public class MainActivity extends ActionBarActivity {
     ToggleButton bluetoothToggleButton;
     String spinnerAmountStr = "1";
     RelativeLayout cvrLayout;
+    Button clearSavedBTDeviceButton;
+    Button startBTScanButton;
+    Button connectBTButton;
     private Dialog dialog;
 
     Handler myHandler = new Handler(){
@@ -125,6 +118,9 @@ public class MainActivity extends ActionBarActivity {
         tipAmount = (EditText) findViewById(R.id.tip_amount);
         swipeOnlyToggleButton = (ToggleButton) findViewById(R.id.swipe_only_mode_toggle_button);
         bluetoothToggleButton = (ToggleButton) findViewById(R.id.bluetooth_toggle_button);
+        clearSavedBTDeviceButton = (Button) findViewById(R.id.clearsavedbtdevice);
+        startBTScanButton = (Button) findViewById(R.id.start_bt_scan_button);
+        connectBTButton = (Button) findViewById(R.id.connect_bluetooth_button);
 
         try {
             emvButton.setOnClickListener(mListner);
@@ -135,6 +131,9 @@ public class MainActivity extends ActionBarActivity {
             quickChipTipAmountButton.setOnClickListener(mListner);
             quickChipAuthOnlyButton.setOnClickListener(mListner);
             lastTransactionButton.setOnClickListener(mListner);
+            clearSavedBTDeviceButton.setOnClickListener(mListner);
+            startBTScanButton.setOnClickListener(mListner);
+            connectBTButton.setOnClickListener(mListner);
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
@@ -211,6 +210,35 @@ public class MainActivity extends ActionBarActivity {
 
 
     EMVTransactionManager.QuickChipTransactionSessionListener iemvTransaction = new EMVTransactionManager.QuickChipTransactionSessionListener() {
+        @Override
+        public void onReturnBluetoothDevices(final List<BluetoothDevice> bluetoothDeviceList) {
+            // setup the alert builder
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle("Bluetooth Devices");
+
+            String[] titles = new String[bluetoothDeviceList.size()];
+            for (int i=0;i<bluetoothDeviceList.size();i++) {
+                titles[i] = bluetoothDeviceList.get(i).getName();
+            }
+            builder.setItems(titles, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    EMVTransactionManager.connectBTDevice(MainActivity.this, bluetoothDeviceList.get(0), iemvTransaction);
+                }
+            });
+
+            // create and show the alert dialog
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+
+        }
+
+        @Override
+        public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {
+            Log.d("Bluetooth device", "bluetooth device connected : " + bluetoothDevice.getName());
+        }
+
         @Override
         public void onTransactionStatusUpdate(String transactionStatus) {
             statusTextView.setTextColor(Color.GREEN);
@@ -599,6 +627,8 @@ public class MainActivity extends ActionBarActivity {
                 EMVTransactionManager.prepareDataForQuickChipTransaction(context, iemvTransaction);
             } else if (view == clearDataButton) {
                 EMVTransactionManager.clearStoredQuickChipData(iemvTransaction);
+            } else if (view == clearSavedBTDeviceButton) {
+                EMVTransactionManager.clearSavedBTDevice(context);
             } else if (view == quickChipTipOptionButton) {
                 EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context, new EMVTransactionManager.TipOptions(15, 18, 20));
             } else if (view == quickChipTipAmountButton) {
@@ -622,6 +652,13 @@ public class MainActivity extends ActionBarActivity {
             } else if (view == lastTransactionButton) {
                 Intent i = new Intent(MainActivity.this, LastTransactionActivity.class);
                 MainActivity.this.startActivity(i);
+            }else if (view == startBTScanButton) {
+                EMVTransactionManager.setDeviceConnectionType(EMVDeviceConnectionType.BLUETOOTH);
+                bluetoothToggleButton.setChecked(true);
+                EMVTransactionManager.startBTScan(context, iemvTransaction);
+            } else if (view == connectBTButton) {
+                //will try to connect last used bluetooth device
+                EMVTransactionManager.connectBTDevice(MainActivity.this, null, iemvTransaction);
             }
         }
     };

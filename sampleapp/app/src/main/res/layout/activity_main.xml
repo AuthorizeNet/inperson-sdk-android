@@ -53,12 +53,10 @@
                     android:id="@+id/swipe_only_mode_toggle_button"/>
 
                 <TextView
-                    android:visibility="gone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Bluetooth?"/>
                 <ToggleButton
-                    android:visibility="gone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/bluetooth_toggle_button"/>
@@ -84,7 +82,21 @@
                 android:layout_height="wrap_content"
                 android:text="Clear Saved Data"
                 android:id="@+id/clearsaveddatabutton"/>
-
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Clear Saved BT Device"
+                android:id="@+id/clearsavedbtdevice"/>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Start BT Scan"
+                android:id="@+id/start_bt_scan_button"/>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Connect Bluetooth"
+                android:id="@+id/connect_bluetooth_button"/>
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
