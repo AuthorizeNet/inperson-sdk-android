@@ -275,9 +275,9 @@ EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction,
 **NOTE:** To use Quick Chip functionality, the card reader has to be on updated firmware version and config. Refer to the OTA Update section for more details.
 
 ### Bluetooth support
-The In-Person SDK for Android now supports Bluetooth connection mode with AnywhereCommerce Walker C2X BT readers. To enable the Bluetooth connection, follow these steps from class `EMVTransactionManager`:
+The In-Person SDK for Android now supports a Bluetooth connection mode with AnywhereCommerce Walker C2X BT readers. To enable the Bluetooth connection, follow these steps from class `EMVTransactionManager`:
 
-1. set the connection mode to Bluetooth
+1. Set the connection mode to Bluetooth.
 ```java
 enum EMVDeviceConnectionType {
 	AUDIO,
@@ -285,37 +285,37 @@ enum EMVDeviceConnectionType {
 }
 EMVTransactionManager.setDeviceConnectionType(EMVDeviceConnectionType deviceConnectionType);
 ```
-2. start the Bluetooth scan 
+2. Start the Bluetooth scan.
 ```java
 EMVTransactionManager.startBTScan(Context context, QuickChipTransactionListener listener);
 ```
-3. connect to the Bluetooth device
+3. Connect to the Bluetooth device.
 ```java 
 EMVTransactionManager.connectBTDevice(Context context, BluetoothDevice bluetoothDevice, QuickChipTransactionListener listener);
 //here the Bluetooth device needs to be imported from android.bluetooth.BluetoothDevice
 ```
-*NOTE*: typically the name of the Bluetooth device can be found on the back side of the reader.
+*NOTE*: Typically the name of the Bluetooth device is on the back of the reader.
 
-To get the call back from Bluetooth device scan and connections, make sure to implement the following methods in `QuickChipTransactionSessionListener`
+To receive the call-back from the Bluetooth device, implement the following methods in `QuickChipTransactionSessionListener`
 
 ```java
 void onReturnBluetoothDevices(List<BluetoothDevice> bluetoothDeviceList);
 void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice);
 ```
-Once reached the `onBluetoothDeviceConnected` callback, it means the connection with Bluetooth device is successfully established, it is safe to start EMV transaction,
+When you receive the `onBluetoothDeviceConnected` callback, the connection with the Bluetooth device is successfully established and it is now safe to start EMV transaction.
 
-4. start the transaction normally as you would with Audio jack connection
+4. Start the transaction normally.
 ```java
 EMVTransactionManager.startEMVTransaction(EMVTransaction emvTransaction, final EMVTransactionListener emvTransactionListener, Context context)
 ```
 
-*NOTE:* the In-Person Android SDK will remember the last used Bluetooth device by default, so that the merchant does not need to go through the connection step every time they start a new transaction. You can reset the last used device by calling
+*NOTE:* By default, the In-Person Android SDK will remember the last Bluetooth device that was used, so you do not need to implement this procedure for each session. However, you can reset the last used device by calling:
 ```java
 EMVTransactionManager.clearSavedBTDevice(Context context);
 ```
 
 ### Swipe only mode
-When working with AnywhereCommerce Walker C2X devices, the EMV/QuickChip mode is being turned on by default, however if developers prefer to use MSR only mode on this readers, it is supported by calling this before starting the transaction:
+When you use a AnywhereCommerce Walker C2X device, EMV/Quick Chip is turned on by default. However, you can choose to use the Magnetic Stripe Reader by calling this before the transaction:
 ```java
 public enum TerminalMode{
 	SWIPE_ONLY,
@@ -323,7 +323,7 @@ public enum TerminalMode{
 }
 EMVTransactionManager.setTerminalMode(TerminalMode terminalMode);
 ```
-Please contact customer support for the supported mode associated with your merchant settings.
+Please contact customer support to determine the supported mode that is associated with your merchant settings.
 
 ## Tips
 
