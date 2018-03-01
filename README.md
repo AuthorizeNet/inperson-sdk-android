@@ -1,3 +1,4 @@
+
 # Authorize.Net In-Person Android SDK Integration Guide
 
 The Authorize.Net In-Person SDK provides a Semi-Integrated Solution for EMV payment processing. For an overview of the semi-integrated environment and the transaction workflow within that environment, see our [Authorize.Net In-Person SDK Overview](http://developer.authorize.net/api/reference/features/in-person.html). This SDK builds on the Authorize.Net API for transaction processing. For more in-depth information on the Authorize.Net API, see our [API Reference](http://developer.authorize.net/api/reference/). For frequently asked questions, see [the EMV FAQ page](https://www.authorize.net/support/emvfaqs/).
@@ -274,6 +275,57 @@ EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction,
 ```
 
 **NOTE:** To use Quick Chip functionality, the card reader has to be on updated firmware version and config. Refer to the OTA Update section for more details.
+
+### Bluetooth support
+The In-Person SDK for Android now supports a Bluetooth connection mode with AnywhereCommerce Walker C2X BT readers. To enable the Bluetooth connection, follow these steps from class `EMVTransactionManager`:
+
+1. Set the connection mode to Bluetooth.
+```java
+enum EMVDeviceConnectionType {
+	AUDIO,
+	BLUETOOTH
+}
+EMVTransactionManager.setDeviceConnectionType(EMVDeviceConnectionType deviceConnectionType);
+```
+2. Start the Bluetooth scan.
+```java
+EMVTransactionManager.startBTScan(Context context, QuickChipTransactionListener listener);
+```
+3. Connect to the Bluetooth device.
+```java 
+EMVTransactionManager.connectBTDevice(Context context, BluetoothDevice bluetoothDevice, QuickChipTransactionListener listener);
+//here the Bluetooth device needs to be imported from android.bluetooth.BluetoothDevice
+```
+*NOTE*: Typically the name of the Bluetooth device is on the back of the reader.
+
+To receive the call-back from the Bluetooth device, implement the following methods in `QuickChipTransactionSessionListener`
+
+```java
+void onReturnBluetoothDevices(List<BluetoothDevice> bluetoothDeviceList);
+void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice);
+```
+When you receive the `onBluetoothDeviceConnected` callback, the connection with the Bluetooth device is successfully established and it is now safe to start EMV transaction.
+
+4. Start the transaction normally.
+```java
+EMVTransactionManager.startEMVTransaction(EMVTransaction emvTransaction, final EMVTransactionListener emvTransactionListener, Context context)
+```
+
+*NOTE:* By default, the In-Person Android SDK will remember the last Bluetooth device that was used, so you do not need to implement this procedure for each session. However, you can reset the last used device by calling:
+```java
+EMVTransactionManager.clearSavedBTDevice(Context context);
+```
+
+### Swipe only mode
+When you use a AnywhereCommerce Walker C2X device, EMV/Quick Chip is turned on by default. However, you can choose to use the Magnetic Stripe Reader by calling this before the transaction:
+```java
+public enum TerminalMode{
+	SWIPE_ONLY,
+	SWIPE_OR_INSERT
+}
+EMVTransactionManager.setTerminalMode(TerminalMode terminalMode);
+```
+Please contact customer support to determine the supported mode that is associated with your merchant settings.
 
 ## Tips
 
