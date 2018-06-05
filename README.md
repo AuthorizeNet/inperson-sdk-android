@@ -178,6 +178,22 @@ public void onPrepareQuickChipDataSuccessful() {
 public void onPrepareQuickChipDataError(EMVErrorCode error, String cause) {
 
 }
+
+@Override
+public void onReturnBluetoothDevices(final List<BluetoothDevice> bluetoothDeviceList) {
+
+}
+
+@Override
+public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {
+
+}
+
+@Override
+public void onBluetoothDeviceDisConnected() {
+
+}
+
 };
 
 // Construct the transaction object.

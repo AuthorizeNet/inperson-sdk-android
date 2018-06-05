@@ -29,6 +29,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.bbpos.bbdevice.BBDeviceController;
+
 import net.authorize.ResponseReasonCode;
 import net.authorize.aim.emv.EMVDeviceConnectionType;
 import net.authorize.aim.emv.EMVErrorCode;
@@ -237,6 +239,11 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {
             Log.d("Bluetooth device", "bluetooth device connected : " + bluetoothDevice.getName());
+        }
+
+        @Override
+        public void onBluetoothDeviceDisConnected() {
+            Log.d("Bluetooth device", "bluetooth device disconnected");
         }
 
         @Override
@@ -569,6 +576,26 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {
+
+        }
+
+        @Override
+        public void onBluetoothDeviceDisConnected() {
+
+        }
+
+        @Override
+        public void onAudioAutoConfigProgressUpdate(double v) {
+
+        }
+
+        @Override
+        public void onAudioAutoConfigCompleted(boolean b, String s) {
+
+        }
+
+        @Override
+        public void onAudioAutoConfigError(BBDeviceController.AudioAutoConfigError audioAutoConfigError) {
 
         }
     };
