@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -28,6 +29,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import com.bbpos.bbdevice.BBDeviceController;
 
 import net.authorize.ResponseReasonCode;
 import net.authorize.aim.emv.EMVDeviceConnectionType;
@@ -75,6 +78,7 @@ public class MainActivity extends ActionBarActivity {
     Button startBTScanButton;
     Button connectBTButton;
     private Dialog dialog;
+    AlertDialog alertDialog = null;
 
     Handler myHandler = new Handler(){
 
@@ -148,7 +152,12 @@ public class MainActivity extends ActionBarActivity {
     void setUIPreferences() {
 //        EmvSdkUISettings.setBackgroundDrawableId(R.drawable.emvbackground);
         EmvSdkUISettings.setToastColor(Color.GREEN);
+        EmvSdkUISettings.setSignViewBorderColor(R.color.primary_dark,(int)getResources().getDimension(R.dimen.signature_view_border_thickness));
 
+        EmvSdkUISettings.setBackgroundDrawableId(R.drawable.emvbackground);
+        EmvSdkUISettings.setSignViewBackgroundResId(R.color.white);
+        EmvSdkUISettings.setSignCaptureBgResId(R.color.white);
+        EmvSdkUISettings.setSignViewBorderColor(ContextCompat.getColor(this, R.color.red), (int)getResources().getDimension(R.dimen.signature_view_border_thickness));
     }
 
     @Override
@@ -212,31 +221,38 @@ public class MainActivity extends ActionBarActivity {
     EMVTransactionManager.QuickChipTransactionSessionListener iemvTransaction = new EMVTransactionManager.QuickChipTransactionSessionListener() {
         @Override
         public void onReturnBluetoothDevices(final List<BluetoothDevice> bluetoothDeviceList) {
-            // setup the alert builder
+            if (null != alertDialog) {
+                alertDialog.dismiss();
+                alertDialog = null;
+            }
+
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setTitle("Bluetooth Devices");
 
             String[] titles = new String[bluetoothDeviceList.size()];
-            for (int i=0;i<bluetoothDeviceList.size();i++) {
+            for (int i = 0; i < bluetoothDeviceList.size(); i++) {
                 titles[i] = bluetoothDeviceList.get(i).getName();
             }
             builder.setItems(titles, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    EMVTransactionManager.connectBTDevice(MainActivity.this, bluetoothDeviceList.get(0), iemvTransaction);
+                    EMVTransactionManager.connectBTDevice(MainActivity.this, bluetoothDeviceList.get(which), iemvTransaction);
                 }
             });
 
             // create and show the alert dialog
-            AlertDialog dialog = builder.create();
-            dialog.show();
-
-
+            alertDialog = builder.create();
+            alertDialog.show();
         }
 
         @Override
         public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {
             Log.d("Bluetooth device", "bluetooth device connected : " + bluetoothDevice.getName());
+        }
+
+        @Override
+        public void onBluetoothDeviceDisConnected() {
+            Log.d("Bluetooth device", "bluetooth device disconnected");
         }
 
         @Override
@@ -571,6 +587,26 @@ public class MainActivity extends ActionBarActivity {
         public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {
 
         }
+
+        @Override
+        public void onBluetoothDeviceDisConnected() {
+
+        }
+
+        @Override
+        public void onAudioAutoConfigProgressUpdate(double v) {
+
+        }
+
+        @Override
+        public void onAudioAutoConfigCompleted(boolean b, String s) {
+
+        }
+
+        @Override
+        public void onAudioAutoConfigError(BBDeviceController.AudioAutoConfigError audioAutoConfigError) {
+
+        }
     };
 
 
@@ -619,12 +655,25 @@ public class MainActivity extends ActionBarActivity {
                     EMVDeviceConnectionType.BLUETOOTH : EMVDeviceConnectionType.AUDIO;
             EMVTransactionManager.setDeviceConnectionType(deviceConnectionType);
 
-            if (view == emvButton) {
-                EMVTransactionManager.startEMVTransaction(emvTransaction, iemvTransaction, context);
-            } else if (view == quickChipButton) {
-                EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context);
-            } else if (view == prepareDataButton) {
-                EMVTransactionManager.prepareDataForQuickChipTransaction(context, iemvTransaction);
+            if (view == emvButton || view == quickChipButton || view == prepareDataButton) {
+                double amountVal = 0;
+                try {
+                    amountVal = Double.parseDouble(amount.getText().toString());
+                }catch (Exception e){
+                    amountVal = 0;
+                    e.printStackTrace();
+                }
+                if (amountVal > 0) {
+                    if (view == emvButton) {
+                        EMVTransactionManager.startEMVTransaction(emvTransaction, iemvTransaction, context);
+                    } else if (view == quickChipButton) {
+                        EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context);
+                    } else {
+                        EMVTransactionManager.prepareDataForQuickChipTransaction(context, iemvTransaction);
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(), "Please enter valid amount", Toast.LENGTH_LONG).show();
+                }
             } else if (view == clearDataButton) {
                 EMVTransactionManager.clearStoredQuickChipData(iemvTransaction);
             } else if (view == clearSavedBTDeviceButton) {

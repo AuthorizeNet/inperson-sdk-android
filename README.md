@@ -132,11 +132,16 @@ public interface QuickChipTransactionSessionListener extends EMVTransactionListe
 void onTransactionStatusUpdate(String transactionStatus);
 void onPrepareQuickChipDataSuccessful();
 void onPrepareQuickChipDataError(EMVErrorCode error, String cause);
+
+//bluetooth connection callbacks
+void onReturnBluetoothDevices(List<BluetoothDevice> bluetoothDeviceList);
+void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice);
+void onBluetoothDeviceDisConnected();
 }
 ```
 We support Quick Chip with UI and Quick Chip in the background.
 
-### Quick chip with SDK provided UI
+### Quick Chip with SDK-Provided UI
 
 The `startQuickChipTransaction` call works in the same way as `startEMVTransaction`:
 1. Provide the `EMVTransaction`, `QuickChipTransactionSessionListener` objects with transaction details and callbacks.
@@ -178,6 +183,22 @@ public void onPrepareQuickChipDataSuccessful() {
 public void onPrepareQuickChipDataError(EMVErrorCode error, String cause) {
 
 }
+
+@Override
+public void onReturnBluetoothDevices(final List<BluetoothDevice> bluetoothDeviceList) {
+
+}
+
+@Override
+public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {
+
+}
+
+@Override
+public void onBluetoothDeviceDisConnected() {
+
+}
+
 };
 
 // Construct the transaction object.
@@ -214,11 +235,11 @@ emvTransaction.setEmployeeId("EMPLOYEE 1");
 EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context);
 ```
 
-### Quick Chip in the Background
+### Quick Chip in the Background (No UI)
 
-To use Quick Chip without the UI component, being the transaction by calling `prepareDataForQuickChipTransaction`. Here are the steps:
+To use Quick Chip without the UI component, begin the transaction by calling `prepareDataForQuickChipTransaction`. Here are the steps:
 
-1. Provide a `QuickChipTransactionSessionListener` object that listens to SDK status changes as it communicates with reader. Information and error messages will be shown through `QuickChipTransactionSessionListener` callbacks.
+1. Provide a `QuickChipTransactionSessionListener` object that listens to SDK status changes as it communicates with the reader. Information and error messages will be shown through `QuickChipTransactionSessionListener` callbacks.
 2. After a `onPrepareQuickChipDataSuccessful` callback, card data will be temporarily stored inside the SDK. To finish the transaction, just initiate `startQuickChipTransaction` with the transaction details and finish the transaction.
 3. You can check if there is any stored card data using `hasStoredQuickChipData`, or choose to discard that data using `clearStoredQuickChipData`.
 
@@ -274,9 +295,9 @@ EMVTransactionManager.clearStoredQuickChipData();
 EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context);
 ```
 
-**NOTE:** To use Quick Chip functionality, the card reader has to be on updated firmware version and config. Refer to the OTA Update section for more details.
+**NOTE:** To use Quick Chip functionality, the card reader must have the latest firmware version and configuration. Refer to the OTA Update section for more details.
 
-### Bluetooth support
+### Bluetooth Support
 The In-Person SDK for Android now supports a Bluetooth connection mode with AnywhereCommerce Walker C2X BT readers. To enable the Bluetooth connection, follow these steps from class `EMVTransactionManager`:
 
 1. Set the connection mode to Bluetooth.
@@ -316,7 +337,7 @@ EMVTransactionManager.startEMVTransaction(EMVTransaction emvTransaction, final E
 EMVTransactionManager.clearSavedBTDevice(Context context);
 ```
 
-### Swipe only mode
+### Swipe-Only Mode
 When you use a AnywhereCommerce Walker C2X device, EMV/Quick Chip is turned on by default. However, you can choose to use the Magnetic Stripe Reader by calling this before the transaction:
 ```java
 public enum TerminalMode{
@@ -373,16 +394,16 @@ You can configure the UI of the In-Person SDK to better match the UI of the merc
 
 The merchant app can configure the following UI parameters:
 
-**SDK Font color:**
+**SDK font color:**
 `EmvSdkUISettings.setFontColorId(R.color.black);`
 
-**SDK Button font color:**
+**SDK button font color:**
 `EmvSdkUISettings.setButtonTextColor(R.color.font_green);`
 
 **SDK background color:**
 `EmvSdkUISettings.setBackgroundColorId(R.color.light_blue);`
 
-**Banner/Top bar background color:**
+**Banner/top bar background color:**
 `EmvSdkUISettings.setBannerBackgroundColor(R.color.white);`
 
 For the color properties listed above, the merchant application must define color values and pass the color IDs to the In-Person SDK:
@@ -396,6 +417,20 @@ The merchant application must have a drawable file in the resource file. The dra
 `EmvSdkUISettings.setButtonDrawableId(R.drawable.button_material_style_custom);`
 
 The merchant application must define a drawable. SDK supports state list drawables also.  The merchant application must provide the drawable ID to the EMV SDK.
+
+You can also customize the signature screen with following APIs:
+
+**Signature screen background color:**
+`EmvSdkUISettings.setSignViewBackgroundResId(R.color.white);`
+
+**Signature screen background drawable:**
+`EmvSdkUISettings.setSignViewBackgroundResId(R.drawable.apple);`
+
+**Signature view Border color:**
+`EmvSdkUISettings.setSignViewBorderColor(R.color.light_blue)`
+
+**Signature view background color:**
+`EmvSdkUISettings.setSignCaptureBgResId(R.color.white)`
 
 ## Non-EMV Transaction Processing
 
@@ -419,7 +454,7 @@ CASH;
 
 ### Non-EMV Code Samples
 
-The following code samples use keyed in credit card information. To use another transaction type, simply replace `TransactionType.AUTH_CAPTURE` with the type of transaction you want (shown in the list above). For example, TransactionType.AUTH_ONLY or TransactionType.CREDIT.
+The following code samples use keyed-in credit card information. To use another transaction type, simply replace `TransactionType.AUTH_CAPTURE` with the type of transaction you want (shown in the list above). For example, `TransactionType.AUTH_ONLY` or `TransactionType.CREDIT`.
 
 ```java
 //login to gateway to get valid session token
@@ -458,7 +493,7 @@ order.setTotalAmount(new BigDecimal(1.1));
 net.authorize.aim.Result authCaptureResult = (net.authorize.aim.Result) testMerchant.postTransaction(authCaptureTransaction);
 ```
 
-### Code Sample for Non-EMV transactions Using Encrypted Swiper Data
+### Code Sample for Non-EMV Transactions Using Encrypted Swiper Data
 
 ```java
 //login to gateway to get valid session token
@@ -611,3 +646,36 @@ Field Order | Response Code | Response Reason Code | Text
 3 | 2 | 360	| An error occurred during the decryption of the EMV data.
 3 | 2 | 361	| The EMV version is invalid.
 3 | 2 | 362	| x_emv_version is required.
+
+## Auto Configuration of Audio Readers
+
+Android hardware varies between different manufacturers, and there is a possibility that default audio configuration does not work in all Android devices. 
+For audio jack readers, if we check reader information by `getDeviceInfo()` API, and the error returned is `OTAUpdateManager.HeadlessOTAUpdateError.COMM_ERROR`, this implies that default 
+configuration are not working for the attached reader and auto configuration is required to setup it up.
+
+The following API from `OTAUpdateManager` can be used to start auto configuration:
+
+	public static void startAutoConfig(Context context, boolean demoMode, HeadlessOTAUpdateListener listener)
+	
+
+The following interface methods have been added to `HeadlessOTAUpdateListener` to monitor and update configuration process:
+
+1- 	`void onAudioAutoConfigProgressUpdate(double var1)`;
+		Return the auto configuration progress in percentage.
+	
+2- `void onAudioAutoConfigCompleted(boolean isDefaultSettings, String autoConfigSettings)`;
+		The auto configuration completed. If it is not default settings, the auto configuration settings are returned. 
+
+3- `void onAudioAutoConfigError(AudioAutoConfigError error)`;
+		The auto config resulted in some error.
+	
+
+Apart from the three additions to `HeadlessOTAUpdateListener` for auto configuration, shown above, another interface method is added to notify when bluetooth device gets disconnected. 	
+
+4- `void onBluetoothDeviceDisConnected()`;
+	Bluetooth device got disconnected.
+
+	
+At anytime if it is required to cancel the auto configuration, use following API from `OTAUpdateManager` - 
+
+	`public static void cancelAutoConfig(Context context, boolean demoMode, HeadlessOTAUpdateListener listener)`
