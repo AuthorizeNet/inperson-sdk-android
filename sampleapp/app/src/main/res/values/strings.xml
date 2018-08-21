@@ -21,4 +21,5 @@
         <item>$9</item>
         <item>$10</item>
     </string-array>
+    <string name="last_transaction">Last Transaction</string>
 </resources>
