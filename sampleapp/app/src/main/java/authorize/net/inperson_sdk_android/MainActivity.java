@@ -3,29 +3,39 @@ package authorize.net.inperson_sdk_android;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -41,8 +51,11 @@ import net.authorize.aim.emv.EMVTransactionType;
 import net.authorize.aim.emv.EmvSdkUISettings;
 import net.authorize.aim.emv.OTAUpdateManager;
 import net.authorize.aim.emv.QuickChipTransactionSession;
+import net.authorize.cim.ProfileTransactionManager;
 import net.authorize.data.Order;
 import net.authorize.data.OrderItem;
+import net.authorize.data.cim.CustomerProfile;
+import net.authorize.data.cim.PaymentProfile;
 import net.authorize.mobile.Result;
 import net.authorize.mobile.TransactionType;
 import net.authorize.util.StringUtils;
@@ -55,8 +68,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
-public class MainActivity extends ActionBarActivity {
-    List<String> list;
+public class MainActivity extends AppCompatActivity {
+    String TAG = MainActivity.class.getSimpleName();
     Button emvButton;
     Button quickChipButton;
     Button prepareDataButton;
@@ -65,11 +78,16 @@ public class MainActivity extends ActionBarActivity {
     Button quickChipTipAmountButton;
     Button quickChipAuthOnlyButton;
     Button lastTransactionButton;
+    Button quickChipHeadlessProfile;
+    Button quickChipHeadFulProfile;
+    Button quickChipHeadLessAdditionalPaymentProfile;
+    Button quickChipHeadFulAdditionalPaymentProfile;
     TextView statusTextView;
     EditText amount;
     EditText tipAmount;
     EditText tableNumberEditText;
     EditText employeeIdEditText;
+    EditText editCustProfileId;
     ToggleButton swipeOnlyToggleButton;
     ToggleButton bluetoothToggleButton;
     String spinnerAmountStr = "1";
@@ -79,6 +97,11 @@ public class MainActivity extends ActionBarActivity {
     Button connectBTButton;
     private Dialog dialog;
     AlertDialog alertDialog = null;
+    Switch switchProfile;
+    TextInputLayout inputLayoutCustomerProfileId;
+    String customerProfileId = null;
+    boolean IS_BEFORE = true;
+    boolean createProfile = false;
 
     Handler myHandler = new Handler(){
 
@@ -126,6 +149,13 @@ public class MainActivity extends ActionBarActivity {
         startBTScanButton = (Button) findViewById(R.id.start_bt_scan_button);
         connectBTButton = (Button) findViewById(R.id.connect_bluetooth_button);
 
+        quickChipHeadlessProfile = (Button) findViewById(R.id.quick_chip_headless_profile);
+        quickChipHeadFulProfile = (Button) findViewById(R.id.quick_chip_head_ful_profile);
+        quickChipHeadLessAdditionalPaymentProfile = (Button) findViewById(R.id.quick_chip_headless_additional_payment_profile);
+        quickChipHeadFulAdditionalPaymentProfile = (Button) findViewById(R.id.quick_chip_head_ful_additional_payment_profile);
+        switchProfile = (Switch) findViewById(R.id.switchProfile);
+        editCustProfileId = (EditText) findViewById(R.id.edit_cust_profile_id);
+        inputLayoutCustomerProfileId = (TextInputLayout) findViewById(R.id.inputLayoutCustomerProfileId);
         try {
             emvButton.setOnClickListener(mListner);
             quickChipButton.setOnClickListener(mListner);
@@ -138,9 +168,24 @@ public class MainActivity extends ActionBarActivity {
             clearSavedBTDeviceButton.setOnClickListener(mListner);
             startBTScanButton.setOnClickListener(mListner);
             connectBTButton.setOnClickListener(mListner);
+            quickChipHeadlessProfile.setOnClickListener(mListner);
+            quickChipHeadFulProfile.setOnClickListener(mListner);
+            quickChipHeadLessAdditionalPaymentProfile.setOnClickListener(mListner);
+            quickChipHeadFulAdditionalPaymentProfile.setOnClickListener(mListner);
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
+
+        switchProfile.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked)
+                    IS_BEFORE = true;
+                else
+                    IS_BEFORE = false;
+            }
+        });
+
 
         amount = (EditText) findViewById(R.id.editTextAmount);
         context = this;
@@ -275,87 +320,7 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public void onEMVTransactionSuccessful(net.authorize.aim.emv.Result result) {
-            if (result != null) {
-
-                //save previous successful transaction
-                AppManager.lastTransactionResult = result;
-
-                dialog = new Dialog(MainActivity.this);
-                dialog.setContentView(R.layout.receipt);
-
-                TextView status = (TextView) dialog.findViewById(R.id.textViewStatus);
-                status.setText("Transaction Successful");
-                TextView amount = (TextView) dialog.findViewById(R.id.textViewResAmount);
-                TextView tipAmount = (TextView) dialog.findViewById(R.id.textViewResTipAmount);
-
-                amount.setText("$" + result.getAuthorizedAmount() + " USD");
-
-                if (result.getTipAmount() != null) {
-                    tipAmount.setText("$" + result.getTipAmount() + " USD");
-                } else {
-                    tipAmount.setText("N/A");
-                }
-                TextView tid = (TextView) dialog.findViewById(R.id.textViewResTransId);
-                tid.setText(result.getTransId());
-
-                TextView aid = (TextView) dialog.findViewById(R.id.textViewResApplicationId);
-                HashMap<String, String> map = result.getEmvTlvMap();
-                //4f is EMV code for application ID
-                if(map.get("4f")!=null){
-                    aid.setText( map.get("4f"));
-                }
-                else
-                    aid.setVisibility(View.INVISIBLE);
-
-
-
-                TextView mode = (TextView) dialog.findViewById(R.id.textViewResMode);
-                if (result.getIsIssuerResponse())
-                    mode.setText("ISSUER");
-                else
-                    mode.setText("CARD");
-
-
-
-                TextView tvr = (TextView) dialog.findViewById(R.id.textViewResTVR);
-                if (map.containsKey("95")) ;
-                tvr.setText(map.get("95"));
-
-                TextView iad = (TextView) dialog.findViewById(R.id.textViewResIAD);
-                if (map.containsKey("9f10")) ;
-                iad.setText(map.get("9f10"));
-
-                TextView tsi = (TextView) dialog.findViewById(R.id.textViewResTSI);
-                if (map.containsKey("9b")) ;
-                tsi.setText(map.get("9b"));
-
-                TextView arc = (TextView) dialog.findViewById(R.id.textViewResARC);
-                if (map.containsKey("8a")) ;
-                arc.setText(map.get("8b"));
-
-
-//                cvrLayout = (RelativeLayout) dialog.findViewById(R.id.cvrLayout);
-
-//                if(result.isShowSignature())
-//                    cvrLayout.setVisibility(View.VISIBLE);
-//                else
-//                    cvrLayout.setVisibility(View.INVISIBLE);
-
-                dialog.show();
-            } else;
-//                Toast.makeText(getApplicationContext(), "Fallback swipe transactions will be supported in next release", Toast.LENGTH_LONG).show();
-
-//            Button button = (Button)dialog.findViewById(R.id.button);
-//
-//            button.setOnClickListener(new  View.OnClickListener(){
-//
-//                @Override
-//                public void onClick(View view){
-//
-//                }
-//
-//            });
-
+            processEmvTransactionResult(result, null);
         }
 
         View.OnClickListener listener =new  View.OnClickListener(){
@@ -389,37 +354,53 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         public void onEMVTransactionError(net.authorize.aim.emv.Result result, EMVErrorCode emvError) {
+            processEmvTransactionError(result, emvError);
+        }
+    };
 
-
-            // do a time out error first
-
+    void processEmvTransactionError(net.authorize.aim.emv.Result result, EMVErrorCode emvError) {
             if (result != null) {
-
+            Log.i(TAG, "onEMVTransactionError tId: " + result.getTransId());
                 ArrayList<MessageType> message1 = null;
-
                 message1 = result.getMessages();
                 if (message1 != null
                         && message1.size() > 0
                         && message1.get(0) != null
                         && message1.get(0).compareTo(MessageType.E00007) == 0) {
-                    Toast.makeText(context.getApplicationContext(), "Session time out: Please log in again", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context.getApplicationContext(), "Session " +
+                        "time out: Please log in again", Toast.LENGTH_SHORT).show();
                     Intent i = new Intent(context, LoginActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(i);
                     finish();
                     return;
-
                 }
             }
 
-
             if (result != null && result.getEmvTlvMap() != null) {
-
                 HashMap<String, String> emvMap = result.getEmvTlvMap();
                 dialog = new Dialog(MainActivity.this);
                 dialog.setContentView(R.layout.receipt);
                 TextView amount = (TextView) dialog.findViewById(R.id.textViewResAmount);
                 TextView tipAmount = (TextView) dialog.findViewById(R.id.textViewResTipAmount);
+            Button buttonOk = (Button) dialog.findViewById(R.id.button_ok);
+
+            buttonOk.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
+
+            try {
+                Log.i(TAG, "Sign base64: " + result.getSignatureBase64());
+                byte[] decodedString = Base64.decode(result.getSignatureBase64().getBytes(), Base64.DEFAULT);
+                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                ImageView img = (ImageView) dialog.findViewById(R.id.image_captured_sign);
+                img.setImageBitmap(decodedByte);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
                 amount.setText("$" + result.getAuthorizedAmount() + " USD");
 
@@ -440,10 +421,9 @@ public class MainActivity extends ActionBarActivity {
 
                 TextView aid = (TextView) dialog.findViewById(R.id.textViewResApplicationId);
 //
-                if(emvMap.get("4f")!=null){
+            if (emvMap.get("4f") != null) {
                     aid.setText("ApplicationId: " + emvMap.get("4f"));
-                }
-                else
+            } else
                     aid.setVisibility(View.INVISIBLE);
 
                 TextView tvr = (TextView) dialog.findViewById(R.id.textViewResTVR);
@@ -463,32 +443,22 @@ public class MainActivity extends ActionBarActivity {
                 arc.setText(emvMap.get("8b"));
 
                 TextView errorMsg = (TextView) dialog.findViewById(R.id.textViewStatus);
-
-
-                //
                 ArrayList<ResponseReasonCode> responseError = result
                         .getTransactionResponseErrors();
                 if (responseError != null
                         && responseError.size() > 0
                         && !StringUtils.isEmpty(responseError
-                        .get(0).getReasonText()))
-                    errorMsg.setText(responseError.get(0)
+                    .get(0).getReasonText())) {
+                errorMsg.setText("Transaction Unsuccessful " + responseError.get(0)
                             .getReasonText());
-
-                else
+            } else {
                     errorMsg.setText("Transaction Unsuccessful");
-
-                //
+            }
 
                 TextView merchantText = (TextView) dialog.findViewById(R.id.textViewResMerchant);
                 merchantText.setVisibility(View.GONE);
                 dialog.show();
-
-
             } else {
-
-                ///else
-
                 AlertDialog.Builder adb = new AlertDialog.Builder(context);
                 ArrayList<MessageType> message = null;
                 if (result != null) {
@@ -518,7 +488,6 @@ public class MainActivity extends ActionBarActivity {
                             .get(0).getReasonText()))
                         adb.setMessage(responseError.get(0)
                                 .getReasonText());
-
                     else
                         adb.setMessage("Transaction Unsuccessful");
                 }
@@ -527,15 +496,9 @@ public class MainActivity extends ActionBarActivity {
                 adb.setNeutralButton("OK", null);
                 adb.setCancelable(true);
                 adb.create().show();
-
             }
-
-
         }
 
-
-
-    };
 
     OTAUpdateManager.HeadlessOTAUpdateListener headlessOTAUpdateListener = new OTAUpdateManager.HeadlessOTAUpdateListener() {
         @Override
@@ -655,7 +618,9 @@ public class MainActivity extends ActionBarActivity {
                     EMVDeviceConnectionType.BLUETOOTH : EMVDeviceConnectionType.AUDIO;
             EMVTransactionManager.setDeviceConnectionType(deviceConnectionType);
 
-            if (view == emvButton || view == quickChipButton || view == prepareDataButton) {
+            if (view == emvButton || view == quickChipButton ||
+                    view == quickChipHeadlessProfile || view == quickChipHeadFulProfile ||
+                    view == quickChipHeadFulAdditionalPaymentProfile || view == quickChipHeadLessAdditionalPaymentProfile) {
                 double amountVal = 0;
                 try {
                     amountVal = Double.parseDouble(amount.getText().toString());
@@ -665,15 +630,56 @@ public class MainActivity extends ActionBarActivity {
                 }
                 if (amountVal > 0) {
                     if (view == emvButton) {
+                        createProfile = false;
+                        customerProfileId = null;
                         EMVTransactionManager.startEMVTransaction(emvTransaction, iemvTransaction, context);
                     } else if (view == quickChipButton) {
                         EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context);
+                    } else if (view == quickChipHeadFulProfile) {
+                        Log.d(TAG, "HeadFul " + IS_BEFORE);
+                        createProfile = false;
+                        customerProfileId = null;
+                        EMVTransactionManager.createCustomerProfileHeadFul(emvTransaction, context, true, IS_BEFORE, profileTransactionListener);
+                    } else if (view == quickChipHeadlessProfile) {
+                        createProfile = true;
+                        customerProfileId = null;
+                        if (IS_BEFORE) {
+                            showConsentDialog(emvTransaction, null, null);
+                        } else {
+                            EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context);
+                        }
+                    } else if (view == quickChipHeadLessAdditionalPaymentProfile) {
+                        customerProfileId = null;
+                        createProfile = true;
+                        String id = editCustProfileId.getText().toString().trim();
+                        if (null != id && !id.isEmpty()) {
+                            customerProfileId = id;
+                            if (IS_BEFORE) {
+                                showConsentDialog(emvTransaction, null, customerProfileId);
+                            } else {
+                                EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context);
+                            }
+                        } else {
+                            inputLayoutCustomerProfileId.setError("Please enter profile id..");
+                        }
+                    } else if (view == quickChipHeadFulAdditionalPaymentProfile) {
+                        Log.d(TAG, "quickChipButtonAdditionalPaymentProfile " + IS_BEFORE);
+                        customerProfileId = null;
+                        createProfile = false;
+                        String id = editCustProfileId.getText().toString().trim();
+                        if (null != id && !id.isEmpty()) {
+                            customerProfileId = id;
+                            EMVTransactionManager.createAdditionalPaymentProfileHeadFul(emvTransaction, context, true, IS_BEFORE,
+                                    profileTransactionListener, customerProfileId);
                     } else {
-                        EMVTransactionManager.prepareDataForQuickChipTransaction(context, iemvTransaction);
+                            inputLayoutCustomerProfileId.setError("Please enter profile id..");
+                        }
                     }
                 } else {
                     Toast.makeText(getApplicationContext(), "Please enter valid amount", Toast.LENGTH_LONG).show();
                 }
+            } else if(view == prepareDataButton ){
+                EMVTransactionManager.prepareDataForQuickChipTransaction(context, iemvTransaction);
             } else if (view == clearDataButton) {
                 EMVTransactionManager.clearStoredQuickChipData(iemvTransaction);
             } else if (view == clearSavedBTDeviceButton) {
@@ -764,5 +770,320 @@ public class MainActivity extends ActionBarActivity {
 
         return false;
     }
+
+    void showConsentDialog(final EMVTransaction emvTransaction, final String transactionId, final String profileId) {
+        final Dialog dialog = new Dialog(context);
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.layout_consent_diaog);
+
+        Button buttonOk = (Button) dialog.findViewById(R.id.button_ok);
+        Button buttonCancelDialog = (Button) dialog.findViewById(R.id.button_cancel_dialog);
+        TextView textViewTitle = (TextView) dialog.findViewById(R.id.text_view_title);
+
+        if (null != customerProfileId) {//ie we are creating an additional payment profile
+            textViewTitle.setText("You are about to add additional payment profile to existing customer profile?");
+        } else {
+            textViewTitle.setText("Do you want to create customer profile?");
+        }
+
+        buttonOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                if (null != transactionId) {//transaction id null means transaction is yet to be done
+                    showProfileDialog(profileId, transactionId);
+                } else {
+                    EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context);
+                }
+            }
+        });
+
+        buttonCancelDialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                createProfile = false;
+                dialog.dismiss();
+                if (null != transactionId) {
+                    dialog.dismiss();
+                } else if (null != emvTransaction) {
+                    createProfile = false;
+                    EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context);
+                }
+            }
+        });
+        dialog.show();
+    }
+
+
+    void showProfileDialog(final String profileId, final String transactionId) {
+        ProfileFragment.ProfileListener pf = new ProfileFragment.ProfileListener() {
+            @Override
+            public void onCustomerProfileInputsSubmitted(CustomerProfile customerProfile, PaymentProfile paymentProfile) {
+                if (null != transactionId) {
+                    ProfileTransactionManager.getInstance().createCustomerProfileFromTransaction(context, AppManager.merchant,
+                            transactionId, customerProfile, paymentProfile, profileTransactionListener);
+                }
+            }
+
+            @Override
+            public void onPaymentProfileInputSubmitted(PaymentProfile paymentProfile) {
+                if (null != transactionId) {
+                    ProfileTransactionManager.getInstance().createAdditionalPaymentProfile(profileId, transactionId, AppManager.merchant,
+                            context, paymentProfile, profileTransactionListener);
+                }
+            }
+
+            @Override
+            public void onProfileCancelled() {
+                Log.d(TAG, "onProfileCancelled");
+            }
+        };
+
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        Fragment prev = getFragmentManager().findFragmentByTag("dialog");
+        if (prev != null) {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+        String task = ProfileFragment.CREATE_CUSTOMER_PROFILE;
+        if (null != profileId) {
+            task = ProfileFragment.CREATE_PAYMENT_PROFILE;
+        } else if (null != transactionId) {
+            task = ProfileFragment.CREATE_CUSTOMER_PROFILE;
+        }
+        ProfileFragment profileFragment = new ProfileFragment(pf, task);
+        profileFragment.show(ft, "dialog");
+    }
+
+
+    void processEmvReadError(EMVErrorCode emvError) {
+        Log.i(TAG, "Result Error");
+        AlertDialog.Builder adb = new AlertDialog.Builder(context);
+        adb.setTitle("EMV Status");
+        adb.setNeutralButton("OK", null);
+        adb.setCancelable(true);
+        if (emvError != null) {
+            adb.setMessage(emvError.getErrorString());
+
+        } else
+            adb.setMessage("EMV Error");
+
+        if (emvError == EMVErrorCode.VOLUME_WARNING_NOT_ACCEPTED) {
+            AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
+        } else {
+            adb.create().show();
+        }
+    }
+
+    void processCimResult(net.authorize.cim.Result result) {
+        try {
+            String profileId = result.getCustomerProfileIdList().get(0);
+            String paymentProfileId = result.getCustomerPaymentProfileIdList().get(0);
+            Toast.makeText(getApplicationContext(), "Profile Id: " + profileId + "\n" + "Payment Profile ID: " + paymentProfileId,
+                    Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), result.getMessages().get(0).getText(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    void processEmvTransactionResult(final net.authorize.aim.emv.Result result, net.authorize.cim.Result profileResult) {
+        if (result != null) {
+            Log.i(TAG, "Result Available: onEMVTransactionSuccessful");
+            //save previous successful transaction
+            AppManager.lastTransactionResult = result;
+
+            dialog = new Dialog(MainActivity.this);
+            dialog.setContentView(R.layout.receipt);
+
+            TextView status = (TextView) dialog.findViewById(R.id.textViewStatus);
+            status.setText("Transaction Successful");
+            TextView amount = (TextView) dialog.findViewById(R.id.textViewResAmount);
+            TextView tipAmount = (TextView) dialog.findViewById(R.id.textViewResTipAmount);
+            Button buttonOk = (Button) dialog.findViewById(R.id.button_ok);
+            buttonOk.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                    if (createProfile) {
+                        if (null != result && null != result.getTransId()) {
+                            if (IS_BEFORE) {
+                                showProfileDialog(customerProfileId, result.getTransId());
+                            } else {
+                                showConsentDialog(null, result.getTransId(), customerProfileId);
+                            }
+                        }
+                    }
+                }
+            });
+
+            try {
+                byte[] decodedString = Base64.decode(result.getSignatureBase64().getBytes(), Base64.DEFAULT);
+                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                ImageView img = (ImageView) dialog.findViewById(R.id.image_captured_sign);
+                img.setImageBitmap(decodedByte);
+            } catch (Exception e) {
+
+            }
+            amount.setText("$" + result.getAuthorizedAmount() + " USD");
+
+            if (result.getTipAmount() != null) {
+                tipAmount.setText("$" + result.getTipAmount() + " USD");
+            } else {
+                tipAmount.setText("N/A");
+            }
+            TextView tid = (TextView) dialog.findViewById(R.id.textViewResTransId);
+            tid.setText(result.getTransId());
+
+            TextView aid = (TextView) dialog.findViewById(R.id.textViewResApplicationId);
+            HashMap<String, String> map = result.getEmvTlvMap();
+            //4f is EMV code for application ID
+            if (map.get("4f") != null) {
+                aid.setText(map.get("4f"));
+            } else
+                aid.setVisibility(View.INVISIBLE);
+
+
+            TextView mode = (TextView) dialog.findViewById(R.id.textViewResMode);
+            if (result.getIsIssuerResponse())
+                mode.setText("ISSUER");
+            else
+                mode.setText("CARD");
+
+
+            TextView tvr = (TextView) dialog.findViewById(R.id.textViewResTVR);
+            if (map.containsKey("95")) ;
+            tvr.setText(map.get("95"));
+
+            TextView iad = (TextView) dialog.findViewById(R.id.textViewResIAD);
+            if (map.containsKey("9f10")) ;
+            iad.setText(map.get("9f10"));
+
+            TextView tsi = (TextView) dialog.findViewById(R.id.textViewResTSI);
+            if (map.containsKey("9b")) ;
+            tsi.setText(map.get("9b"));
+
+            TextView arc = (TextView) dialog.findViewById(R.id.textViewResARC);
+            if (map.containsKey("8a")) ;
+            arc.setText(map.get("8b"));
+
+            if (null != profileResult) {
+                LinearLayout layoutProfile = (LinearLayout) dialog.findViewById(R.id.layout_profile);
+                layoutProfile.setVisibility(View.VISIBLE);
+                TextView textProfileIdValue = (TextView) dialog.findViewById(R.id.text_profile_id_value);
+                TextView textPaymentProfileIdValue = (TextView) dialog.findViewById(R.id.text_payment_profile_id_value);
+                try {
+                    textProfileIdValue.setText(profileResult.getCustomerProfileIdList().get(0).toString());
+                    textPaymentProfileIdValue.setText(profileResult.getCustomerPaymentProfileIdList().get(0).toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            dialog.show();
+        } else {
+            Log.i(TAG, "Result null");
+        }
+    }
+
+
+    final EMVTransactionManager.ProfileTransactionListener profileTransactionListener =
+            new EMVTransactionManager.ProfileTransactionListener() {
+                @Override
+                public void onTransactionStatusUpdate(String transactionStatus) {
+                    statusTextView.setTextColor(Color.GREEN);
+                    statusTextView.setText(transactionStatus);
+                }
+
+                @Override
+                public void onPrepareQuickChipDataSuccessful() {
+                    statusTextView.setTextColor(Color.BLACK);
+                    statusTextView.setText("Chip data saved Successfully");
+                }
+
+                @Override
+                public void onPrepareQuickChipDataError(EMVErrorCode error, String cause) {
+                    statusTextView.setTextColor(Color.RED);
+                    statusTextView.setText(cause);
+                }
+
+                @Override
+                public void onReturnBluetoothDevices(List<BluetoothDevice> bluetoothDeviceList) {
+
+                }
+
+                @Override
+                public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {
+
+                }
+
+                @Override
+                public void onBluetoothDeviceDisConnected() {
+
+                }
+
+                @Override
+                public void onProfileEMVTransactionSuccessful(net.authorize.aim.emv.Result emvResult,
+                                                              net.authorize.cim.Result custProfileResult) {
+                    if (null != emvResult) {
+                        processEmvTransactionResult(emvResult, custProfileResult);
+                    } else {
+                        processCimResult(custProfileResult);
+                    }
+                }
+
+                @Override
+                public void onProfileTransactionSuccessful(net.authorize.cim.Result result) {
+                    statusTextView.setText("");
+                    processCimResult(result);
+                }
+
+                @Override
+                public void onEMVTransactionSuccessful(net.authorize.aim.emv.Result result) {
+                    processEmvTransactionResult(result, null);
+                }
+
+                @Override
+                public void onEMVReadError(EMVErrorCode emvError) {
+                    processEmvReadError(emvError);
+                }
+
+                @Override
+                public void onEMVTransactionError(net.authorize.aim.emv.Result result, EMVErrorCode emvError) {
+                    processEmvTransactionError(result, emvError);
+                }
+
+                @Override
+                public void onProfileEMVTransactionError(String message, Exception e, net.authorize.aim.emv.Result result) {
+                    if (null != result) {
+                        processEmvTransactionResult(result, null);
+                    }
+                    String errorMessage = "Error creating profile..";
+                    if (null != message) {
+                        errorMessage = message;
+                    }
+                    statusTextView.setTextColor(Color.RED);
+                    statusTextView.setText(errorMessage);
+                }
+
+                @Override
+                public void onProfileTransactionError(String errorMessage, Exception e) {
+                    String message = "Error creating profile..";
+                    if (null != errorMessage) {
+                        message = errorMessage;
+                    }
+                    statusTextView.setTextColor(Color.RED);
+                    statusTextView.setText(message);
+                    Toast.makeText(getApplicationContext(), "Error: " + message, Toast.LENGTH_LONG).show();
+                }
+
+
+                @Override
+                public void onProfileTransactionStarted(String message) {
+                    statusTextView.setTextColor(Color.GREEN);
+                    statusTextView.setText(message);
+                }
+
+            };
 
 }

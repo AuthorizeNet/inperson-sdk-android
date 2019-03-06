@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:padding="20dp"
-    android:layout_height="match_parent"
-    android:minWidth="300dp"
-    android:weightSum="1">
+    android:paddingTop="10dp"
+    android:layout_height="wrap_content"
+    android:minWidth="300dp">
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -19,12 +18,12 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/scrollView" >
-
-
+        android:id="@+id/scrollView"
+        android:layout_above="@+id/button_ok"
+        android:layout_below="@id/textView2">
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:orientation="vertical" android:layout_width="match_parent"
-            android:padding="20dp"
+            android:padding="10dp"
             android:layout_height="match_parent"
             android:weightSum="1">
             <TextView
@@ -33,15 +32,14 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="Transaction Unsuccessful"
                 android:id="@+id/textViewStatus"
-                android:textStyle="bold"
-                android:paddingTop="20dp" />
+                android:textStyle="bold"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:id="@+id/textViewResReason"
-                android:paddingTop="5dp" />
+                android:layout_marginTop="5dp" />
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -269,8 +267,71 @@
                     android:paddingTop="10dp" />
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/layout_profile"
+                android:visibility="gone"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:text="Cust Profile Id:"
+                        android:id="@+id/text_profile_id"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:id="@+id/text_profile_id_value"
+                        android:paddingTop="10dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+                    <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:text="Payment Profile Id:"
+                        android:id="@+id/text_payment_profile_id"
+                        android:layout_weight="1" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:id="@+id/text_payment_profile_id_value"
+                        android:paddingTop="10dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+
+
+            <ImageView
+                android:id="@+id/image_captured_sign"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:scaleType="fitXY"
+                android:adjustViewBounds="true"
+                />
+
         </LinearLayout>
     </ScrollView>
 
+    <Button
+        android:id="@+id/button_ok"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="OK"/>
 
-</LinearLayout>
+</RelativeLayout>

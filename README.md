@@ -19,7 +19,7 @@ To determine which processor you use, you can submit an API call to [getMerchant
 # Setting Up Your Project
 
 1. Confirm that you are using Android Studio 2.3+ with min Android SDK version 21 and Gradle 2.14.1.
-2. Select File > Open > sampleapp to open the project.
+2. Select *File > Open > sampleapp* to open the project.
 3. Run Sync in Gradle to bring all the dependencies up to date.
 4. Plug in the test reader and run the sample application.
 
@@ -384,8 +384,6 @@ EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction,
 EMVTransactionManager.startQuickChipTransaction(emvTransaction, iemvTransaction, context, true, true);
 ```
 
-![Screenshot](/Screenshots/TipOptions.png)
-
 **NOTE:** Tips functionality is currently only valid for TSYS merchants.
 
 ## Configuring the UI
@@ -536,12 +534,265 @@ order.setTotalAmount(new BigDecimal(1.1));
 net.authorize.aim.Result authCaptureResult = (net.authorize.aim.Result) testMerchant.postTransaction(authCaptureTransaction);
 ```
 
-
 **NOTE:** For Non-EMV transaction processing, there is no UI provided by the SDK. The client application is expected to have its own layout and display the response/error message properly.
 
 Fore more details on the supported API call accepted by Authorize.Net gateway, please refer to our [Authorize.Net API Documentation](http://developer.authorize.net/api/reference/).
 
+## Creating a Customer Profiles from a Transaction
+You can use the information that you capture during a transaction to create a customer profile. The process differs depending on whether you use the provided UI or your own UI.
+
+### Creating a Profile Using Your Own UI
+The transaction response contains a transaction ID. To create a customer profile, send the transaction ID and the customer profile details taken as input from the customer. Send the Boolean value which decides whether the consent for creating profile is to be taken before or after the transaction. The following example assumes that you use your own UI.
+
+#### Method Call
+
+```java
+//Create customer profile object.
+CustomerProfile customerProfile = CustomerProfile.createCustomerProfile(); 
+customerProfile.setEmail(email); 
+customerProfile.setMerchantCustomerId(merchantCustomerId); 
+customerProfile.setDescription(description);
+```
+
+```java
+//Create payment profile object.
+PaymentProfile paymentProfile = PaymentProfile.createPaymentProfile();
+Address address = Address.createAddress(); 
+address.setFirstName("abc); 
+address.setLastName("def"); 
+address.setCity("New york"); 
+address.setState("CA"); 
+address.setCountry("USA"); 
+address.setZipPostalCode("94585"); 
+address.setCompany("lmn");
+address.setPhoneNumber("02014585485"); 
+address.setAddress(Mt street); 
+address.setFaxNumber("857458547965);
+paymentProfile.setBillTo(address);
+```
+
+```java
+// Implement the profile transaction listener which is overridden from QuickChipTransactionSessionListener and send its object as an input parameter.
+
+final EMVTransactionManager.ProfileTransactionListener profileTransactionListener = new EMVTransactionManager.ProfileTransactionListener() {
+@Override  public void onTransactionStatusUpdate(String transactionStatus) {}
+@Override  public void onPrepareQuickChipDataSuccessful() {}
+@Override  public void onPrepareQuickChipDataError(EMVErrorCode error, String cause) {}
+@Override  public void onReturnBluetoothDevices(List<BluetoothDevice> bluetoothDeviceList) {}
+@Override  public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {}
+@Override  public void onBluetoothDeviceDisConnected() {}
+@Override  public void onProfileEMVTransactionSuccessful(net.authorize.aim.emv.Result emvResult,net.authorize.cim.Result custProfileResult) { } 
+@Override  public void onProfileTransactionSuccessful(net.authorize.cim.Result result) {}
+@Override  public void onEMVTransactionSuccessful(net.authorize.aim.emv.Result result) {}
+@Override  public void onEMVReadError(EMVErrorCode emvError) {}
+@Override  public void onEMVTransactionError(net.authorize.aim.emv.Result result, EMVErrorCode emvError) {}
+public void onProfileEMVTransactionError(final String message,final Exception e, net.authorize.aim.emv.Result result) {}
+public void onProfileTransactionError(String errorMessage, Exception e) {}
+@Override  public void onProfileTransactionStarted(String message) {}
+};
+```
+
+```java
+//Call the provided API for creating customer profile as below:
+
+ProfileTransactionManager.getInstance().createCustomerProfileFromTransaction(context, AppManager.merchant, transactionId, customerProfile,paymentProfile, profileTransactionListener);
+```
+
+#### Method Details
+```java
+/**
+ * @param context: Android component context.
+ * @param merchant: Merchant object.
+ * @param transactionId: Transaction ID from which user want to create profile.
+ * @param customerProfile: Customer profile details object like email, merchant customer ID or description.
+ * @param paymentProfile: PaymentProfile profile details objects, such as billing address.
+ * @param profileTransactionListener: An interface callback to receive the result after transaction is completed.
+*/
+ 
+public void createCustomerProfileFromTransaction(final Context context, final Merchant merchant, String transactionId,final CustomerProfile  customerProfile, final PaymentProfile paymentProfile, final EMVTransactionManager.ProfileTransactionListener profileTransactionListener)
+```
+
+### Creating a Profile Using the Included UI
+When you create a profile using the included UI, the customer profile is created as soon as the transaction is done. Send the customer profile and payment profile objects with the EMV transaction object while creating the transaction. The transaction is completed the transaction UI is used to create the customer profile within SDK itself. The SDK provides the UI for collecting customer information.
+When the profile is created, both the payment transaction result and the profile result objects are sent simultaneously to the calling application.
+
+#### Method Call
+```java
+//Create customer profile object.
+CustomerProfile customerProfile = CustomerProfile.createCustomerProfile(); 
+customerProfile.setEmail(email); 
+customerProfile.setMerchantCustomerId(merchantCustomerId); 
+customerProfile.setDescription(description);
+```
+
+```java
+//Create payment profile object.
+PaymentProfile paymentProfile = PaymentProfile.createPaymentProfile();
+Address address = Address.createAddress(); 
+address.setFirstName("abc); 
+address.setLastName("def"); 
+address.setCity("New york"); 
+address.setState("CA"); 
+address.setCountry("USA"); 
+address.setZipPostalCode("94585"); 
+address.setCompany("lmn");
+address.setPhoneNumber("02014585485"); 
+address.setAddress(Mt street); 
+address.setFaxNumber("857458547965);
+paymentProfile.setBillTo(address);
+```
+
+```java
+// Implement the profile transaction listener which is overridden from QuickChipTransactionSessionListener and send its object as an input parameter.
+
+final EMVTransactionManager.ProfileTransactionListener profileTransactionListener = new EMVTransactionManager.ProfileTransactionListener() {
+@Override  public void onTransactionStatusUpdate(String transactionStatus) {}
+@Override  public void onPrepareQuickChipDataSuccessful() {}
+@Override  public void onPrepareQuickChipDataError(EMVErrorCode error, String cause) {}
+@Override  public void onReturnBluetoothDevices(List<BluetoothDevice> bluetoothDeviceList) {}
+@Override  public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {}
+@Override  public void onBluetoothDeviceDisConnected() {}
+@Override  public void onProfileEMVTransactionSuccessful(net.authorize.aim.emv.Result emvResult,net.authorize.cim.Result custProfileResult) { } 
+@Override  public void onProfileTransactionSuccessful(net.authorize.cim.Result result) {}
+@Override  public void onEMVTransactionSuccessful(net.authorize.aim.emv.Result result) {}
+@Override  public void onEMVReadError(EMVErrorCode emvError) {}
+@Override  public void onEMVTransactionError(net.authorize.aim.emv.Result result, EMVErrorCode emvError) {}
+public void onProfileEMVTransactionError(final String message,final Exception e, net.authorize.aim.emv.Result result) {}
+public void onProfileTransactionError(String errorMessage, Exception e) {}
+@Override  public void onProfileTransactionStarted(String message) {}
+};
+```
+ 
+```java         
+EMVTransactionManager.createCustomerProfileHeadFul(emvTransaction, context, true, IS_BEFORE, profileTransactionListener);
+```
+
+#### Method Details
+```java
+ /**
+* @param emvTransaction: Details for creating transaction ie amount etc. 
+* @param context: Android component context
+* @param showSignature: to show signature or not
+* @param isConsentBefore: This is related to taking user consent before payment transaction or after payment transaction.
+* @param profileEMVTransactionListener: An interface callback to receive the result after transaction is completed
+*/
+```
+
+```java     
+public static void createCustomerProfileHeadFul(EMVTransaction emvTransaction, Context context, boolean showSignature,
+boolean isConsentBefore, final ProfileTransactionListener profileEMVTransactionListener)
+```
+
+## Creating an Additional Payment from a Transaction Using Your Own UI
+After the transaction is completed, you can create an additional payment. Send the payment details object (with details such as billing address), customer profile ID, and the transaction ID of the previous transaction to the SDK. You must create customized UI to collect the customer data.
+
+### Method Call
+
+```java
+//Create payment profile object.
+PaymentProfile paymentProfile = PaymentProfile.createPaymentProfile();
+Address address = Address.createAddress(); 
+address.setFirstName("abc); 
+address.setLastName("def"); 
+address.setCity("New york"); 
+address.setState("CA"); 
+address.setCountry("USA"); 
+address.setZipPostalCode("94585"); 
+address.setCompany("lmn");
+address.setPhoneNumber("02014585485"); 
+address.setAddress(Mt street); 
+address.setFaxNumber("857458547965);
+paymentProfile.setBillTo(address);
+```
+
+```java
+// Implement the profile transaction listener which is overridden from QuickChipTransactionSessionListener and send its object as an input parameter.
+
+final EMVTransactionManager.ProfileTransactionListener profileTransactionListener = new EMVTransactionManager.ProfileTransactionListener() {
+@Override  public void onTransactionStatusUpdate(String transactionStatus) {}
+@Override  public void onPrepareQuickChipDataSuccessful() {}
+@Override  public void onPrepareQuickChipDataError(EMVErrorCode error, String cause) {}
+@Override  public void onReturnBluetoothDevices(List<BluetoothDevice> bluetoothDeviceList) {}
+@Override  public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {}
+@Override  public void onBluetoothDeviceDisConnected() {}
+@Override  public void onProfileEMVTransactionSuccessful(net.authorize.aim.emv.Result emvResult,net.authorize.cim.Result custProfileResult) { } 
+@Override  public void onProfileTransactionSuccessful(net.authorize.cim.Result result) {}
+@Override  public void onEMVTransactionSuccessful(net.authorize.aim.emv.Result result) {}
+@Override  public void onEMVReadError(EMVErrorCode emvError) {}
+@Override  public void onEMVTransactionError(net.authorize.aim.emv.Result result, EMVErrorCode emvError) {}
+public void onProfileEMVTransactionError(final String message,final Exception e, net.authorize.aim.emv.Result result) {}
+public void onProfileTransactionError(String errorMessage, Exception e) {}
+@Override  public void onProfileTransactionStarted(String message) {}
+ };
+```
+
+```java
+ProfileTransactionManager.getInstance().createAdditionalPaymentProfile(profileId, transactionId, AppManager.merchant, context, paymentProfile, profileTransactionListener);
+```
+
+#### Method Details 
+```java
+/**
+	* @param profileId: Profile id for which user want to create additional payment profile
+	* @param transactionId: Transaction id from which the payment profile is to be created.
+	* @param merchant: Logged in Merchant object.
+	* @param context: Android component context.
+	* @param paymentProfile: Payment profile details object.
+	* @param profileTransactionListener: An interface callback to receive the result after transaction is completed
+*/
+```
+
+```java
+public void createAdditionalPaymentProfile(String profileId, String transactionId, Merchant merchant, Context context, PaymentProfile paymentProfile, final EMVTransactionManager.ProfileTransactionListener profileTransactionListener){final ResultReceiver resultReceiver = new ResultReceiver(new Handler())
+```
+
+## Creating an Additional Payment from a Transaction Using the Included UI
+
+To create additional payment profiles, the user has to send the customer profile id with the emv transaction object while submitting the transaction.
+
+```java
+// Implement the profile transaction listener which is overridden from QuickChipTransactionSessionListener and send its object as an input parameter.
+
+final EMVTransactionManager.ProfileTransactionListener profileTransactionListener = new EMVTransactionManager.ProfileTransactionListener() {
+@Override  public void onTransactionStatusUpdate(String transactionStatus) {}
+@Override  public void onPrepareQuickChipDataSuccessful() {}
+@Override  public void onPrepareQuickChipDataError(EMVErrorCode error, String cause) {}
+@Override  public void onReturnBluetoothDevices(List<BluetoothDevice> bluetoothDeviceList) {}
+@Override  public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {}
+@Override  public void onBluetoothDeviceDisConnected() {}
+@Override  public void onProfileEMVTransactionSuccessful(net.authorize.aim.emv.Result emvResult,net.authorize.cim.Result custProfileResult) { } 
+@Override  public void onProfileTransactionSuccessful(net.authorize.cim.Result result) {}
+@Override  public void onEMVTransactionSuccessful(net.authorize.aim.emv.Result result) {}
+@Override  public void onEMVReadError(EMVErrorCode emvError) {}
+@Override  public void onEMVTransactionError(net.authorize.aim.emv.Result result, EMVErrorCode emvError) {}
+public void onProfileEMVTransactionError(final String message,final Exception e, net.authorize.aim.emv.Result result) {}
+public void onProfileTransactionError(String errorMessage, Exception e) {}
+@Override  public void onProfileTransactionStarted(String message) {}
+ };
+```
+
+```java
+EMVTransactionManager.createAdditionalPaymentProfileHeadFul(emvTransaction, context, true, IS_BEFORE,profileTransactionListener, customerProfileId);
+```
+
+#### Method Details
+
+```java
+/**
+* @param emvTransaction
+* @param context
+* @param showSignature
+* @param isBefore
+* @param profileEMVTransactionListener
+* @param profileId: Application just has to send the profile id. Payment profile input is taken in the sdk UI.
+*/
+
+```java
+public static void createAdditionalPaymentProfileHeadFul(EMVTransaction emvTransaction, Context context, boolean showSignature, boolean isBefore, final ProfileTransactionListener profileEMVTransactionListener, String profileId)
+```
+
 ## Customer Email Receipt
+
 To send the customer a transaction receipt, create a notification transaction and post it to the Authorize.Net gateway. Here is a code sample:
 
 ```java
@@ -583,7 +834,7 @@ net.authorize.notification.Result result = (net.authorize.notification.Result) t
 //result object has all the result coming from Anet gateway
 ```
 
-*NOTE:* For other supported notification transaction types, refer to the Transaction and Result object in the `net.authorize.notification` package.
+**NOTE:** For other supported notification transaction types, refer to the Transaction and Result object in the `net.authorize.notification` package.
 
 ## Reporting
 
@@ -624,8 +875,6 @@ public static void startOTAUpdate(Context context, boolean demoMode)
 ```
 
 where `context` is the calling Android Context and `demoMode` is for setting the update to be going to either a demo server or a production server.
-
-![Screenshot](/Screenshots/OTAUpdate.png)
 
 In the OTA update page, you have the option to do firmware update, config update, or both. In the option menu, you may get detailed info for the reader that you are currently using.
 
@@ -679,3 +928,4 @@ Apart from the three additions to `HeadlessOTAUpdateListener` for auto configura
 At anytime if it is required to cancel the auto configuration, use following API from `OTAUpdateManager` - 
 
 	`public static void cancelAutoConfig(Context context, boolean demoMode, HeadlessOTAUpdateListener listener)`
+

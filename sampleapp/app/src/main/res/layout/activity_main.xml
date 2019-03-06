@@ -36,9 +36,24 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentStart="true">
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+
+                <Switch
+                    android:id="@+id/switchProfile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:checked="true"
+                    android:text="Create Customer Profile Before Transaction:  " />
+
+            </RelativeLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -71,6 +86,50 @@
                 android:layout_height="wrap_content"
                 android:text="Process payment with QuickChip"
                 android:id="@+id/quickchipbutton" />
+             
+            <Button
+                android:id="@+id/quick_chip_headless_profile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="QuickChip With Headless Profile" />
+
+            <Button
+                android:id="@+id/quick_chip_head_ful_profile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="QuickChip With Headful Profile" />
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/inputLayoutCustomerProfileId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:accessibilityLiveRegion="polite"
+                android:contentDescription="Profile Id"
+                android:hint="Profile Id"
+                android:labelFor="@+id/edit_cust_profile_id">
+
+                <EditText
+                    android:id="@+id/edit_cust_profile_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="10"
+                    android:maxLines="1"
+                    android:textSize="14sp" />
+            </android.support.design.widget.TextInputLayout>
+
+            <Button
+                android:id="@+id/quick_chip_headless_additional_payment_profile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="QuickChip With Additional Payment Profile Headless" />
+
+            <Button
+                android:id="@+id/quick_chip_head_ful_additional_payment_profile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="QuickChip With Additional Payment Profile Headful" />
+
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
