@@ -19,10 +19,10 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import com.google.android.material.textfield.TextInputLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
@@ -197,12 +197,12 @@ public class MainActivity extends AppCompatActivity {
     void setUIPreferences() {
 //        EmvSdkUISettings.setBackgroundDrawableId(R.drawable.emvbackground);
         EmvSdkUISettings.setToastColor(Color.GREEN);
-        EmvSdkUISettings.setSignViewBorderColor(R.color.primary_dark,(int)getResources().getDimension(R.dimen.signature_view_border_thickness));
+        EmvSdkUISettings.setSignViewBorderColor(Color.BLACK,(int)getResources().getDimension(R.dimen.signature_view_border_thickness));
 
         EmvSdkUISettings.setBackgroundDrawableId(R.drawable.emvbackground);
-        EmvSdkUISettings.setSignViewBackgroundResId(R.color.white);
-        EmvSdkUISettings.setSignCaptureBgResId(R.color.white);
-        EmvSdkUISettings.setSignViewBorderColor(ContextCompat.getColor(this, R.color.red), (int)getResources().getDimension(R.dimen.signature_view_border_thickness));
+        EmvSdkUISettings.setSignViewBackgroundResId(Color.WHITE);
+        EmvSdkUISettings.setSignCaptureBgResId(Color.WHITE);
+        EmvSdkUISettings.setSignViewBorderColor(Color.RED, (int)getResources().getDimension(R.dimen.signature_view_border_thickness));
     }
 
     @Override
@@ -237,6 +237,13 @@ public class MainActivity extends AppCompatActivity {
             permissionsNeeded.add("need Bluetooth permissions to communicate with reader");
         if (!addPermission(permissionsList, Manifest.permission.BLUETOOTH_ADMIN))
             permissionsNeeded.add("");
+        if(!addPermission(permissionsList, Manifest.permission.BLUETOOTH_SCAN))
+            permissionsNeeded.add("need Bluetooth permissions to communicate with reader");
+        if(!addPermission(permissionsList, Manifest.permission.BLUETOOTH_CONNECT))
+            permissionsNeeded.add("need Bluetooth permissions to communicate with reader");
+        if(!addPermission(permissionsList, Manifest.permission.ACCESS_FINE_LOCATION))
+            permissionsNeeded.add("need Bluetooth permissions to communicate with reader");
+
         if (!addPermission(permissionsList, Manifest.permission.ACCESS_COARSE_LOCATION))
             permissionsNeeded.add("Need coarse location to access bluetooth device");
 
@@ -727,7 +734,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     ProgressDialog pr;
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (bluetoothToggleButton.isChecked()) {
@@ -735,41 +741,40 @@ public class MainActivity extends AppCompatActivity {
         } else {
             EMVTransactionManager.setDeviceConnectionType(EMVDeviceConnectionType.AUDIO);
         }
-        // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.logout:
-                pr = new ProgressDialog(context);
-                pr.setIndeterminate(true);
-                pr.setMessage("Logging out...");
-                pr.show();
-                Thread t = new Thread(){
-                    @Override
-                    public void run(){
 
-                        net.authorize.mobile.Transaction logoutTrans =  AppManager.merchant.createMobileTransaction(TransactionType.LOGOUT);
-
-                        Result r = (Result)AppManager.merchant.postTransaction(logoutTrans);
-                        myHandler.sendEmptyMessage(1);
-                    }
-                };
-                t.start();
-                return true;
-            case R.id.ota_update:
-                OTAUpdateManager.startOTAUpdate(this, false);
-                return true;
-            case R.id.ota_update_demo:
-                OTAUpdateManager.startOTAUpdate(this, true);
-                return true;
-            case R.id.reset_reader:
-                EMVTransactionManager.resetReader(this, iemvTransaction);
-                return true;
-            case R.id.device_info:
-                OTAUpdateManager.getDeviceInfo(this,true, headlessOTAUpdateListener);
-                return true;
+        int itemId = item.getItemId();
+        if (itemId == R.id.logout) {
+            pr = new ProgressDialog(this);
+            pr.setIndeterminate(true);
+            pr.setMessage("Logging out...");
+            pr.show();
+            Thread t = new Thread() {
+                @Override
+                public void run() {
+                    net.authorize.mobile.Transaction logoutTrans = AppManager.merchant.createMobileTransaction(TransactionType.LOGOUT);
+                    Result r = (Result) AppManager.merchant.postTransaction(logoutTrans);
+                    myHandler.sendEmptyMessage(1);
+                }
+            };
+            t.start();
+            return true;
+        } else if (itemId == R.id.ota_update) {
+            OTAUpdateManager.startOTAUpdate(this, false);
+            return true;
+        } else if (itemId == R.id.ota_update_demo) {
+            OTAUpdateManager.startOTAUpdate(this, true);
+            return true;
+        } else if (itemId == R.id.reset_reader) {
+            EMVTransactionManager.resetReader(this, iemvTransaction);
+            return true;
+        } else if (itemId == R.id.device_info) {
+            OTAUpdateManager.getDeviceInfo(this, true, headlessOTAUpdateListener);
+            return true;
+        } else {
+            return false;
         }
-
-        return false;
     }
+
 
     void showConsentDialog(final EMVTransaction emvTransaction, final String transactionId, final String profileId) {
         final Dialog dialog = new Dialog(context);

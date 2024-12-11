@@ -7,8 +7,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
-import android.support.annotation.IdRes;
-import android.support.v4.app.FragmentActivity;
+import androidx.annotation.IdRes;
+import androidx.fragment.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -33,7 +33,8 @@ import net.authorize.data.creditcard.CreditCardPresenceType;
 import net.authorize.data.mobile.MobileDevice;
 
 import java.math.BigDecimal;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class LoginActivity extends FragmentActivity {
     Button b;
@@ -123,8 +124,16 @@ public class LoginActivity extends FragmentActivity {
                     MobileDevice mobileDevice = MobileDevice.createMobileDevice(deviceID,
                             "Device description", "425-555-0000", "Android");
                     transaction.setMobileDevice(mobileDevice);
+
+                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                    String transactionJson = gson.toJson(transaction);
+                    Log.d("LoginRequest", "Sending request: " + transactionJson);
+
                     result = (net.authorize.mobile.Result) AppManager.merchant
                             .postTransaction(transaction);
+
+                    // Log incoming response
+                    Log.d("LoginResponse", "Received response: " + result.getXmlResponse());
 
                     if(result.isOk()){
 
@@ -141,7 +150,7 @@ public class LoginActivity extends FragmentActivity {
                                 handler.sendEmptyMessage(0);
                             }
                         } catch (Exception ex) {
-
+                            Log.e("loginException", "Exception: " + ex.getMessage());
                         }
                     }
                     else{

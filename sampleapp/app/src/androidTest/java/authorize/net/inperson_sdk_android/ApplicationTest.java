@@ -1,13 +1,11 @@
 package authorize.net.inperson_sdk_android;
 
-import android.app.Activity;
-import android.app.Application;
-import android.content.Context;
-import android.content.Intent;
-import android.test.ApplicationTestCase;
+import android.bluetooth.BluetoothDevice;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import android.util.Log;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import net.authorize.Environment;
 import net.authorize.Merchant;
@@ -24,16 +22,17 @@ import net.authorize.data.mobile.MobileDevice;
 import net.authorize.mobile.Result;
 import net.authorize.util.StringUtils;
 
+import org.junit.Before;
+import org.junit.runner.RunWith;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
-public class ApplicationTest extends ApplicationTestCase<Application> {
-    public ApplicationTest() {
-        super(Application.class);
-    }
-
+@RunWith(AndroidJUnit4.class)
+public class ApplicationTest {
     static final String TestLogTab = "INTestLogs";
 
     EMVTransactionManager.QuickChipTransactionSessionListener iemvTransaction = new EMVTransactionManager.QuickChipTransactionSessionListener() {
@@ -66,13 +65,28 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         public void onEMVTransactionError(net.authorize.aim.emv.Result result, EMVErrorCode emvError) {
             assertTrue("this error case should be handled by client application", false);
         }
+
+        @Override
+        public void onReturnBluetoothDevices(List<BluetoothDevice> list) {
+            // Log the list of Bluetooth devices
+            for (BluetoothDevice device : list) {
+                Log.d(TestLogTab, "Bluetooth Device: " + device.getName() + " - " + device.getAddress());
+            }
+        }
+
+        @Override
+        public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {
+            Log.d(TestLogTab, "Bluetooth Device Connected: " + bluetoothDevice.getName() + " - " + bluetoothDevice.getAddress());
+        }
+
+        @Override
+        public void onBluetoothDeviceDisConnected() {
+            Log.d(TestLogTab, "Bluetooth Device Disconnected");
+        }
     };
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
-        super.setUp();
-
-
         //setup crendentials
         PasswordAuthentication passAuth = PasswordAuthentication
                 .createMerchantAuthentication("MobileCNP1", "mPOSAnet2", "Android-Integration-tests");
@@ -132,17 +146,5 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
 
         return emvTransaction;
 
-    }
-
-
-
-
-
-
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        terminateApplication();
     }
 }
