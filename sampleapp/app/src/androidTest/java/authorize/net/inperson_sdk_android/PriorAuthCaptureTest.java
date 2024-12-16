@@ -10,6 +10,7 @@ import net.authorize.auth.SessionTokenAuthentication;
 import net.authorize.data.Order;
 import net.authorize.data.OrderItem;
 import net.authorize.data.creditcard.CreditCard;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 

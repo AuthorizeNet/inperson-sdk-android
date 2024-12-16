@@ -9,6 +9,7 @@ import net.authorize.data.creditcard.CreditCard;
 import net.authorize.data.swiperdata.SwiperEncryptionAlgorithmType;
 import net.authorize.data.swiperdata.SwiperModeType;
 import net.authorize.util.StringUtils;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 

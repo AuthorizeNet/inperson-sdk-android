@@ -1,6 +1,7 @@
 package authorize.net.inperson_sdk_android;
 
-import android.test.ActivityInstrumentationTestCase2;
+import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
 import net.authorize.Environment;
@@ -18,20 +19,29 @@ import net.authorize.data.OrderItem;
 import net.authorize.data.mobile.MobileDevice;
 import net.authorize.mobile.Result;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.rule.ActivityTestRule;
+
+import static org.junit.Assert.assertTrue;
+
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
-/**
- * Created by yinghaowang on 12/29/16.
- */
+@RunWith(AndroidJUnit4.class)
+public class QuickChipBaseTest {
 
-public class QuickChipBaseTest extends ActivityInstrumentationTestCase2 {
-    public QuickChipBaseTest() {
-        super(MainActivity.class);
-    }
+    @Rule
+    public ActivityTestRule<MainActivity> activityTestRule = new ActivityTestRule<>(MainActivity.class);
+
     static final String TestLogTab = "INTestLogs";
 
     Semaphore semaphore = new Semaphore(0);
+
     EMVTransactionManager.QuickChipTransactionSessionListener iemvTransaction = new EMVTransactionManager.QuickChipTransactionSessionListener() {
         @Override
         public void onTransactionStatusUpdate(String transactionStatus) {
@@ -47,6 +57,27 @@ public class QuickChipBaseTest extends ActivityInstrumentationTestCase2 {
         @Override
         public void onPrepareQuickChipDataError(EMVErrorCode error, String cause) {
             assertTrue("this error case should be handled by client application", false);
+            semaphore.release();
+        }
+
+        @Override
+        public void onReturnBluetoothDevices(List<BluetoothDevice> list) {
+            // Log the list of Bluetooth devices
+            for (BluetoothDevice device : list) {
+                Log.d(TestLogTab, "Bluetooth Device: " + device.getName() + " - " + device.getAddress());
+            }
+            semaphore.release();
+        }
+
+        @Override
+        public void onBluetoothDeviceConnected(BluetoothDevice bluetoothDevice) {
+            Log.d(TestLogTab, "Bluetooth Device Connected: " + bluetoothDevice.getName() + " - " + bluetoothDevice.getAddress());
+            semaphore.release();
+        }
+
+        @Override
+        public void onBluetoothDeviceDisConnected() {
+            Log.d(TestLogTab, "Bluetooth Device Disconnected");
             semaphore.release();
         }
 
@@ -68,35 +99,30 @@ public class QuickChipBaseTest extends ActivityInstrumentationTestCase2 {
             assertTrue("this error case should be handled by client application", false);
             semaphore.release();
         }
+
     };
 
-
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
+    @Before
+    public void setUp() throws Exception {
         EMVTransactionManager.playSoundAndShowBanner = false;
         QuickChipSignatureReviewActivity2.isTestMode = true;
-        //setup crendentials
-        PasswordAuthentication passAuth = PasswordAuthentication
-                .createMerchantAuthentication("login", "password", "Android-Integration-tests");
+
+        PasswordAuthentication passAuth = PasswordAuthentication.createMerchantAuthentication(
+                "login", "password", "Android-Integration-tests");
         AppManager.merchant = Merchant.createMerchant(Environment.SANDBOX, passAuth);
 
         net.authorize.mobile.Transaction transaction = AppManager.merchant
                 .createMobileTransaction(net.authorize.mobile.TransactionType.MOBILE_DEVICE_LOGIN);
-        MobileDevice mobileDevice = MobileDevice.createMobileDevice("Android-Integration-tests",
-                "Device description", "425-555-0000", "Android");
+        MobileDevice mobileDevice = MobileDevice.createMobileDevice(
+                "Android-Integration-tests", "Device description", "425-555-0000", "Android");
         transaction.setMobileDevice(mobileDevice);
-        Result result = (net.authorize.mobile.Result) AppManager.merchant
-                .postTransaction(transaction);
+        Result result = (net.authorize.mobile.Result) AppManager.merchant.postTransaction(transaction);
 
         assertTrue("login should work", result.isOk());
 
         SessionTokenAuthentication sessionTokenAuthentication = SessionTokenAuthentication
                 .createMerchantAuthentication(AppManager.merchant
-                        .getMerchantAuthentication().getName(), result
-                        .getSessionToken(), "Android-Integration-tests");
+                        .getMerchantAuthentication().getName(), result.getSessionToken(), "Android-Integration-tests");
         if ((result.getSessionToken() != null) && (sessionTokenAuthentication != null)) {
             AppManager.merchant.setMerchantAuthentication(sessionTokenAuthentication);
         }
@@ -111,10 +137,11 @@ public class QuickChipBaseTest extends ActivityInstrumentationTestCase2 {
         }
     }
 
+    @Test
     public void testBase() {
-        assertTrue("merchant should have valid authentication field populated", AppManager.merchant.getMerchantAuthentication() != null);
+        assertTrue("merchant should have valid authentication field populated",
+                AppManager.merchant.getMerchantAuthentication() != null);
     }
-
 
     EMVTransaction sampleEMVTransaction(String value) {
         Order order = Order.createOrder();
@@ -137,6 +164,5 @@ public class QuickChipBaseTest extends ActivityInstrumentationTestCase2 {
         emvTransaction.setSolutionID("SOLUTION ID");
 
         return emvTransaction;
-
     }
 }

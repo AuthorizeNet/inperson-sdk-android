@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.TextInputLayout;
+import com.google.android.material.textfield.TextInputLayout;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
