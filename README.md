@@ -20,7 +20,7 @@ To determine which processor you use, you can submit an API call to [getMerchant
 
 # Setting Up Your Project
 
-1. Confirm that you are using Android Studio 2.3+ with min Android SDK version 21 and Gradle 2.14.1.
+1. Confirm that you are using Android Studio Koala with min Android SDK version 34 and Gradle 8.7.
 2. Select *File > Open > sampleapp* to open the project.
 3. Run Sync in Gradle to bring all the dependencies up to date.
 4. Plug in the test reader and run the sample application.
