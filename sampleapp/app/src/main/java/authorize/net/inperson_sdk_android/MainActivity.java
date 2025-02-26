@@ -244,9 +244,6 @@ public class MainActivity extends AppCompatActivity {
         if(!addPermission(permissionsList, Manifest.permission.ACCESS_FINE_LOCATION))
             permissionsNeeded.add("need Bluetooth permissions to communicate with reader");
 
-        if (!addPermission(permissionsList, Manifest.permission.ACCESS_COARSE_LOCATION))
-            permissionsNeeded.add("Need coarse location to access bluetooth device");
-
         if (!permissionsList.isEmpty()) {
             haveAllPermissions = false;
 //            if (!permissionsNeeded.isEmpty()) {
