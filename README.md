@@ -38,12 +38,29 @@ To determine which processor you use, you can submit an API call to [getMerchant
 
 **Step 1.**	Import the _emv-anet-sdk.aar_ file as a library module and build. 
 
-**Step2 .** Authenticate the merchant's application and initialize a valid Merchant object with  `PasswordAuthentication`. You may specify the a test environment (SANDBOX) or live environment (PRODUCTION) to use in enum `Environment`.
+**Step 2.** Authenticate the merchant's application and initialize a valid Merchant object. You may specify the a test environment (SANDBOX) or live environment (PRODUCTION) to use in enum `Environment`. The SDK supports authentication via a transaction key:
+
+**Authentication**
 
 ```java
-PasswordAuthentication passAuth = PasswordAuthentication.createMerchantAuthentication("Username", "Password", "In-person-sdk-tests");
-Merchant merchant = Merchant.createMerchant(Environment.SANDBOX, passAuth);
+/**
+* In merchant portal, navigate to Account → Account and API Settings -> API Credentials and Keys.
+* Obtain API Login ID and Transaction Key.
+*/
+TransactionKeyAuthentication merchantAuth = TransactionKeyAuthentication.createMerchantAuthentication("API_Login_ID", "Transaction_Key");
+Merchant merchant = Merchant.createMerchant(Environment.SANDBOX, merchantAuth);
 ```
+
+Transaction key authentication provides enhanced security and doesn't require maintaining session tokens.
+
+**(DEPRECATED) Password Authentication**
+
+```java
+// PasswordAuthentication passAuth = PasswordAuthentication.createMerchantAuthentication("Username", "Password", "In-person-sdk-tests");
+// Merchant merchant = Merchant.createMerchant(Environment.SANDBOX, passAuth);
+```
+
+This method is used in the sample app and will be deprecated by November 12, 2025. 
 
 **Step 3.**	Create an EMV transaction.
 
@@ -457,18 +474,26 @@ CASH;
 The following code samples use keyed-in credit card information. To use another transaction type, simply replace `TransactionType.AUTH_CAPTURE` with the type of transaction you want (shown in the list above). For example, `TransactionType.AUTH_ONLY` or `TransactionType.CREDIT`.
 
 ```java
-//login to gateway to get valid session token
+// Authentication using transaction key (preferred method)
+TransactionKeyAuthentication merchantAuth = TransactionKeyAuthentication.createMerchantAuthentication("API_Login_ID", "Transaction_Key");
+Merchant testMerchant = Merchant.createMerchant(Environment.SANDBOX, merchantAuth);
+
+// (DEPRECATED) Password authentication
+/*
 PasswordAuthentication passAuth = PasswordAuthentication.createMerchantAuthentication("Username", "Password", "InpersonSDK-Android-test");
 Merchant testMerchant = Merchant.createMerchant(Environment.SANDBOX, passAuth);
+
+// Note: Session token authentication is only needed when using password authentication
+SessionTokenAuthentication sessionTokenAuthentication = SessionTokenAuthentication.createMerchantAuthentication(testMerchant.getMerchantAuthentication().getName(), loginResult.getSessionToken(), "Test EMV Android");
+if ((loginResult.getSessionToken() != null) && (sessionTokenAuthentication != null)) {
+    testMerchant.setMerchantAuthentication(sessionTokenAuthentication);
+}
+*/
+
 testMerchant.setDeviceType(DeviceType.WIRELESS_POS);
 testMerchant.setMarketType(MarketType.RETAIL);
 net.authorize.aim.Transaction transaction = Transaction.createTransaction(testMerchant, TransactionType.AUTH_CAPTURE, new BigDecimal(1.0));
 net.authorize.aim.Result result = (net.authorize.aim.Result)testMerchant.postTransaction(transaction);
-//if login succeeded, populate session token in the Merchant object
-SessionTokenAuthentication sessionTokenAuthentication = SessionTokenAuthentication.createMerchantAuthentication(testMerchant.getMerchantAuthentication().getName(), loginResult.getSessionToken(), "Test EMV Android");
-if ((loginResult.getSessionToken() != null) && (sessionTokenAuthentication != null)) {
-testMerchant.setMerchantAuthentication(sessionTokenAuthentication);
-}
 
 //create new credit card object with required fields
 CreditCard creditCard = CreditCard.createCreditCard();
@@ -496,18 +521,26 @@ net.authorize.aim.Result authCaptureResult = (net.authorize.aim.Result) testMerc
 ### Code Sample for Non-EMV Transactions Using Encrypted Swiper Data
 
 ```java
-//login to gateway to get valid session token
+// Authentication using transaction key (preferred method)
+TransactionKeyAuthentication merchantAuth = TransactionKeyAuthentication.createMerchantAuthentication("API_Login_ID", "Transaction_Key");
+Merchant testMerchant = Merchant.createMerchant(Environment.SANDBOX, merchantAuth);
+
+// (DEPRECATED) Password authentication
+/*
 PasswordAuthentication passAuth = PasswordAuthentication.createMerchantAuthentication("Username", "Password", "InpersonSDK-Android-test");
 Merchant testMerchant = Merchant.createMerchant(Environment.SANDBOX, passAuth);
+
+// Note: Session token authentication is only needed when using password authentication
+SessionTokenAuthentication sessionTokenAuthentication = SessionTokenAuthentication.createMerchantAuthentication(testMerchant.getMerchantAuthentication().getName(), loginResult.getSessionToken(), "Test EMV Android");
+if ((loginResult.getSessionToken() != null) && (sessionTokenAuthentication != null)) {
+    testMerchant.setMerchantAuthentication(sessionTokenAuthentication);
+}
+*/
+
 testMerchant.setDeviceType(DeviceType.WIRELESS_POS);
 testMerchant.setMarketType(MarketType.RETAIL);
 net.authorize.aim.Transaction transaction = Transaction.createTransaction(testMerchant, TransactionType.AUTH_CAPTURE, new BigDecimal(1.0));
 net.authorize.aim.Result result = (net.authorize.aim.Result)testMerchant.postTransaction(transaction);
-//if login succeeded, populate session token in the Merchant object
-SessionTokenAuthentication sessionTokenAuthentication = SessionTokenAuthentication.createMerchantAuthentication(testMerchant.getMerchantAuthentication().getName(), loginResult.getSessionToken(), "Test EMV Android");
-if ((loginResult.getSessionToken() != null) && (sessionTokenAuthentication != null)) {
-testMerchant.setMerchantAuthentication(sessionTokenAuthentication);
-}
 
 //create new credit card object and populate it with the encrypted card data coming from the reader
 CreditCard creditCard = CreditCard.createCreditCard();
@@ -930,4 +963,3 @@ Apart from the three additions to `HeadlessOTAUpdateListener` for auto configura
 At anytime if it is required to cancel the auto configuration, use following API from `OTAUpdateManager` - 
 
 	`public static void cancelAutoConfig(Context context, boolean demoMode, HeadlessOTAUpdateListener listener)`
-
