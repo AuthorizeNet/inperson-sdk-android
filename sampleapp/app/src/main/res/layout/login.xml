@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:textSize="22sp"
-                android:hint="Login Id"
+                android:hint="Login ID"
                 android:textColor="@android:color/black"
                 android:inputType="text"
 
@@ -39,7 +39,7 @@
                 android:ems="10"
                 android:textSize="22sp"
 
-                android:hint="Password"
+                android:hint="Transaction Key"
                 android:inputType="textPassword"
 
 

@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "authorize.net.inperson_sdk_android"
-        minSdkVersion 30
+        minSdkVersion 33
         targetSdkVersion 34
         versionCode 2
         versionName "1.1"

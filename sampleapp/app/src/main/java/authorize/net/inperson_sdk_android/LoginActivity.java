@@ -26,6 +26,7 @@ import net.authorize.aim.emv.EMVTransaction;
 import net.authorize.aim.emv.EMVTransactionManager;
 import net.authorize.auth.PasswordAuthentication;
 import net.authorize.auth.SessionTokenAuthentication;
+import net.authorize.auth.TransactionKeyAuthentication;
 import net.authorize.data.Order;
 import net.authorize.data.OrderItem;
 import net.authorize.data.creditcard.CreditCard;
@@ -39,7 +40,7 @@ import com.google.gson.GsonBuilder;
 public class LoginActivity extends FragmentActivity {
     Button b;
     EditText login;
-    EditText pwd;
+    EditText transactionKey;
     Context context;
     Environment environment = Environment.SANDBOX;
     RadioGroup radioGroup;
@@ -55,7 +56,7 @@ public class LoginActivity extends FragmentActivity {
         b.setOnClickListener(mListner);
 
         login = (EditText)findViewById(R.id.editTextLoginLoginID);
-        pwd = (EditText)findViewById(R.id.editTextLoginPassword);
+        transactionKey = (EditText)findViewById(R.id.editTextLoginPassword);
 
         radioGroup = (RadioGroup) findViewById(R.id.login_type_radio_group);
         testButton = (RadioButton) findViewById(R.id.test_radio_button);
@@ -111,52 +112,22 @@ public class LoginActivity extends FragmentActivity {
                 @Override
                 public void run(){
 
-//                handler.sendEmptyMessage(0);
-                    net.authorize.mobile.Result result;
-                    String deviceID = "Test EMV Android";
-                    PasswordAuthentication passAuth = PasswordAuthentication
-                            .createMerchantAuthentication(login.getText().toString(), pwd.getText().toString(), deviceID);
+                    try {
+                        // Use TransactionKeyAuthentication (no session token needed)
+                        TransactionKeyAuthentication merchantAuth = TransactionKeyAuthentication
+                                .createMerchantAuthentication(login.getText().toString(), transactionKey.getText().toString());
 
-                    AppManager.merchant = Merchant.createMerchant(environment, passAuth);
+                        AppManager.merchant = Merchant.createMerchant(environment, merchantAuth);
 
-                    net.authorize.mobile.Transaction transaction = AppManager.merchant
-                            .createMobileTransaction(net.authorize.mobile.TransactionType.MOBILE_DEVICE_LOGIN);
-                    MobileDevice mobileDevice = MobileDevice.createMobileDevice(deviceID,
-                            "Device description", "425-555-0000", "Android");
-                    transaction.setMobileDevice(mobileDevice);
+                        Log.d("LoginInfo", "Using Transaction Key Authentication");
 
-                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                    String transactionJson = gson.toJson(transaction);
-                    Log.d("LoginRequest", "Sending request: " + transactionJson);
+                        // Transaction key authentication doesn't require a login transaction
+                        // Authentication is validated on the first actual transaction
+                        handler.sendEmptyMessage(0);
 
-                    result = (net.authorize.mobile.Result) AppManager.merchant
-                            .postTransaction(transaction);
-
-                    // Log incoming response
-                    Log.d("LoginResponse", "Received response: " + result.getXmlResponse());
-
-                    if(result.isOk()){
-
-                        try {
-                            SessionTokenAuthentication sessionTokenAuthentication = SessionTokenAuthentication
-                                    .createMerchantAuthentication(AppManager.merchant
-                                            .getMerchantAuthentication().getName(), result
-                                            .getSessionToken(), "Test EMV Android");
-                            if ((result.getSessionToken() != null)
-                                    && (sessionTokenAuthentication != null)) {
-                                AppManager.merchant
-                                        .setMerchantAuthentication(sessionTokenAuthentication);
-
-                                handler.sendEmptyMessage(0);
-                            }
-                        } catch (Exception ex) {
-                            Log.e("loginException", "Exception: " + ex.getMessage());
-                        }
-                    }
-                    else{
+                    } catch (Exception ex) {
+                        Log.e("loginException", "Exception: " + ex.getMessage());
                         handler.sendEmptyMessage(1);
-                        Log.e("EMVResponse",result.getXmlResponse());
-//                    Toast.makeText(context, result.getXmlResponse(),Toast.LENGTH_SHORT).show();
                     }
 
                 }
