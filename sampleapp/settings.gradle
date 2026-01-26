@@ -2,12 +2,34 @@ include ':app'
 
 dependencyResolutionManagement {
     repositories {
-        jcenter()
         maven {
-            url 'https://maven.google.com/'
-            name 'Google'
+            url 'https://artifactory.trusted.visa.com/storage.googleapis.com/download.flutter.io'
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_token}"
+            }
         }
-        google()
+        maven {
+            url 'https://artifactory.trusted.visa.com/innovation-mobile'
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_token}"
+            }
+        }
+        maven {
+            url 'https://artifactory.trusted.visa.com:443/vdca-mobile-virtual'
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_token}"
+            }
+        }
+        maven {
+            url "https://artifactory.trusted.visa.com/mavenrepo/"
+            credentials {
+                username = "${artifactory_user}"
+                password = "${artifactory_token}"
+            }
+        }
     }
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
 }
