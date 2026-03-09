@@ -71,8 +71,6 @@ public class LoginActivity extends FragmentActivity {
                     environment = Environment.SANDBOX;
                 } else if (checkedButton == prodButton) {
                     environment = Environment.PRODUCTION;
-                } else if (checkedButton == hotspotButton) {
-                    environment = Environment.SANDBOX_HOTSPOT;
                 }
             }
         });
